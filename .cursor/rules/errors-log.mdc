@@ -1,0 +1,21 @@
+---
+description: Read and update errors.md so build mistakes are not repeated
+alwaysApply: true
+---
+
+# Error log discipline
+
+Before beginning any new implementation, debugging, or phase/step from the build plan:
+
+1. Read [`errors.md`](errors.md) at the repo root (Open + Recurring watchlist at minimum).
+2. Treat open items and the recurring watchlist as constraints for the current task.
+3. If the task might hit a known failure mode, call it out briefly and choose the prevention approach from the log.
+
+When you hit a bug, failed assumption, CI breakage, or repeated footgun during work:
+
+1. Append a new entry to `errors.md` using the template and next id (`E-XXX`).
+2. Put it under **Open** (or **Resolved** if fixed in the same turn).
+3. Bump **Next id** at the bottom of the template section.
+4. If it is a class of mistake worth remembering permanently, add a one-line row to **Recurring watchlist**.
+
+Do not remove historical entries; only change status (`open` → `resolved` / `wontfix`) and fill in Fix / Prevention.
