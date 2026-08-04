@@ -2,6 +2,8 @@
 
 Graft exposes rewrite recipes to coding agents via the [Model Context Protocol](https://modelcontextprotocol.io/) (stdio transport).
 
+Clean-machine order of surfaces (CLI → MCP → API/dashboard → editor): root [README](../README.md). Editor path: [EXTENSION.md](EXTENSION.md).
+
 ## Quick start
 
 1. Ingest, link, and compile a repo (or use fixture data — see [demo script](../scripts/demo-mvp.sh)).

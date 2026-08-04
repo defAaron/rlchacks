@@ -11,6 +11,8 @@ npm run build
 npm run graft -- serve api [--repo owner/name] [--host 127.0.0.1] [--port 8787]
 ```
 
+Offline fixture smoke (seed, compile, curl `/health` + GraphQL, tear down): `./scripts/demo-api.sh`.
+
 ## Auth (optional)
 
 When `API_TOKEN` is set, all `/graphql` and `/health` requests require:
@@ -27,6 +29,9 @@ Local demo mode: leave `API_TOKEN` unset.
 | --- | --- | --- |
 | `/health` | GET | `{ status, repo }` |
 | `/graphql` | POST | GraphQL queries + mutations |
+| `/dashboard` | GET | Read-only recipe browser (static HTML) |
+
+Editor clients: see [EXTENSION.md](EXTENSION.md).
 
 ## Example queries
 

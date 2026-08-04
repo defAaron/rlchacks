@@ -316,6 +316,72 @@ Record date, demo repo, recipe count, and known issues at each phase exit.
 
 ---
 
+## Checkpoint 6 — 2026-08-03
+- Phase: 6 (HTTP/GraphQL API, suppress, incremental ingest, freshness)
+- Pass / fail: **pass**
+- Demo repo: fixture `acme/widgets` (`testdata/golden-episodes` + GitHub fixture fetch for ingest delta)
+- Episodes / recipes: golden episodes → compile (`GRAFT_MIN_SUPPORT=1`); suppress round-trip verified
+- LLM enabled: no (`GRAFT_LLM_ENABLED=false`)
+- Known issues: live GitHub backfill still needs `GITHUB_TOKEN` (not required for these checks); link/compile still full-reprocess after delta ingest (documented in `docs/API.md`)
+- Spot-check precision (if applicable): n/a
+- Next phase: Phase 7 — Editor Code Actions + apply preview (signed off separately)
+- Tag: _pending_ (no `v0.2.0` / Phase-6 tag invented)
+
+### Checks
+
+| Check | Status | Notes |
+| --- | --- | --- |
+| API ↔ CLI parity | **pass** | GraphQL `suggestGrafts` and `@graft/retrieval` `suggestGrafts` (CLI path) return identical `recipeId` / `score` / `confidence` on `testdata/fixtures/rejected-types.diff` (offline smoke: 3 suggestions matched). Automated field coverage: `packages/api-server/src/server.test.ts` (“CLI parity fields”). |
+| Suppress round-trip | **pass** | CLI: `graft recipes suppress` hides from list (`packages/cli/src/phase6.test.ts`). API: `suppressRecipe` mutation + list excludes id; `recipe(id)` still explainable (`packages/api-server/src/server.test.ts`, `packages/retrieval/src/suppress.test.ts`). |
+| Incremental | **pass** | Second fixture ingest: `prsNew === 0` and `prs ≤` first run (`phase6.test.ts` “second ingest with cursor fetches delta only”). `docs/API.md` documents cursor/`since` delta fetch; full re-link/recompile noted. |
+| Auth | **pass** | `API_TOKEN` → 401 without bearer, 200 with token (`server.test.ts`). Local demo mode documented in `docs/API.md` (leave `API_TOKEN` unset). |
+| Freshness | **pass** | GraphQL `freshness.stale === true` when link watermark exists without compile; `false` after compile + compile cursor (`server.test.ts`). |
+
+### Evidence
+- Suite: `npm run build && npm run typecheck && npm test` — 34 files / 196 tests green (2026-08-03).
+- Packages: `@graft/api-server`, CLI phase6 paths, `@graft/retrieval` suppress/freshness.
+- No product code changes required for this sign-off.
+
+---
+
+## Checkpoint 7 — 2026-08-03
+- Phase: 7 (Editor Code Actions + apply preview — v0.2 SHIP GATE)
+- Pass / fail: **pass** (extension UI paths code-verified; human F5 still recommended)
+- Demo repo: fixture `acme/widgets`
+- Episodes / recipes: golden fixtures; apply_preview over retrieval/MCP/API
+- LLM enabled: no (`GRAFT_LLM_ENABLED=false`)
+- Known issues: no automated VS Code/Cursor UI test in CI — Code Action / modal apply / clickable evidence need human F5; git tag `v0.2.0` not created here
+- Spot-check precision (if applicable): n/a
+- Next phase: Phase 8 — Soft diagnostics, dashboard, webhook (already logged pass separately)
+- Tag: _pending_ — user to tag `v0.2.0` when ready
+
+### Checks
+
+| Check | Status | Notes |
+| --- | --- | --- |
+| PRD v0.2 | **pass** | Editor apply preview + commands/Code Action present; HTTP API + suppress + incremental ingest from Checkpoint 6. |
+| Explicit apply | **pass** (code-verified) | Extension preview is read-only until user confirms modal “Apply”; `workspace.applyEdit` only after confirm (`packages/vscode-extension/src/extension.ts`). No silent rewrite path in MCP/API `apply_preview` (returns unifiedDiff only). |
+| Evidence links | **pass** (code-verified) | Suggestion pick + preview card include GitHub `commentUrl` strings. **Needs human F5** to confirm editor treats URLs as clickable / opens browser. |
+| Regression | **pass** | MVP MCP/CLI demos still covered: MCP `suggest_grafts` / `apply_preview` / list+explain tests green; CLI suggest on `rejected-types.diff` green; full suite 196/196. |
+| Tag | _pending_ | Do not invent tag; user to create `v0.2.0` when ready. |
+
+### Code-verified vs human F5
+
+| Surface | Verification |
+| --- | --- |
+| `apply_preview` (retrieval + MCP + GraphQL schema/resolvers) | Automated: `packages/retrieval/src/suppress.test.ts`, `packages/mcp-server/src/server.test.ts` (“apply_preview matches suggest patch shape”) |
+| Extension commands (`graft.suggest`, `graft.previewSuggestion`, `graft.applyPreview`) | Code + `package.json` contributes; typecheck green via `graft-vscode` |
+| Code Action “Graft: preview historical accept” | Registered in `extension.ts` → `graft.suggest` |
+| Degraded states (no server / no data / stale) | Code paths + messages in `extension.ts` (`degradedMessage`, `ensureFreshness`) — **F5** for banner UX |
+| Manual: bad helper → preview → apply → file matches | **Needs human F5** |
+
+### Evidence
+- Suite: same green run as Checkpoint 6 (34 files / 196 tests).
+- Docs: `docs/API.md` (applyPreview example), `docs/MCP.md` (`apply_preview`), extension package at `packages/vscode-extension`.
+- No product code changes required for this sign-off.
+
+---
+
 ## Checkpoint 8 — 2026-08-03
 - Phase: 8 (Soft diagnostics, dashboard, webhook, multi-repo, redaction — v0.3 SHIP GATE)
 - Pass / fail: **pass**

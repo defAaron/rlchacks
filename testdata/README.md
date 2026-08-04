@@ -2,6 +2,8 @@
 
 Interim Checkpoint 1 **Demo seed** for Phase 2 linking.
 
+Offline API smoke (fixtures → `graft serve api` → curl): `./scripts/demo-api.sh`.
+
 Live `graft ingest` against a public GitHub repo was **not** run: `GITHUB_TOKEN` was unset in the verification environment.
 
 ## Layout
