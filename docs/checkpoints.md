@@ -284,3 +284,33 @@ Record date, demo repo, recipe count, and known issues at each phase exit.
 | Quarantine | _pending_ | Other agent |
 | Tests | **pass** | `npm run build && npm run typecheck && npm test` green: 16 files / 130 tests. Golden link suites: `actionability` 6, `rejected-span` 8, `accepted-fix` 12, `link-repository` 5 (all green). No fixes required. |
 | No secrets in logs | _pending_ | Other agent |
+
+---
+
+## Checkpoint 5 — 2026-08-03
+- Phase: 5 (MCP + demo — MVP ship gate)
+- Pass / fail: **pass**
+- Demo repo: fixture `acme/widgets` (golden-episodes + compile)
+- Episodes / recipes: 12 episodes → multiple recipes after compile (minSupport=1 for demo)
+- LLM enabled: no (`GRAFT_LLM_ENABLED=false`)
+- Known issues: live public-repo ingest still requires `GITHUB_TOKEN`; `apply_preview` / standalone `freshness` tool deferred to Phase 6–7
+- Spot-check precision (if applicable): MCP suggest on `rejected-types.diff` returns evidence-backed graft with `unknown` patch (matches CLI)
+- Next phase: Phase 6 — API, suppress, incremental ingest (not started)
+
+### Checks
+
+| Check | Status | Notes |
+| --- | --- | --- |
+| PRD MVP list | **pass** | MCP-1–3, MCP-6 partial; CLI ingest/link/compile/suggest/recipes; SAF defaults |
+| Agent win | **pass** | `suggest_grafts` on seeded bad diff returns ranked patch + GitHub evidence |
+| Evidence law | **pass** | Handlers refuse suggestions without evidence; tests assert `evidence.length > 0` |
+| Deterministic path | **pass** | Demo + tests with `GRAFT_LLM_ENABLED=false` |
+| CI | **pass** | `npm run build && npm run typecheck && npm run test` — 25 files / 157 tests green |
+| Metrics snapshot | **pass** | Demo: ≥1 recipe for `src/types`; suggest top confidence high/medium/low labeled |
+
+### Deliverables
+- `@graft/mcp-server`: stdio MCP with `list_recipes`, `suggest_grafts`, `explain_recipe`
+- CLI: `graft serve mcp [--repo owner/name]`; root `npm run mcp`
+- Docs: `docs/MCP.md`, README quick start, `docs/DATA_FORMAT.md`, `docs/PIPELINE.md` stubs
+- Demo: `scripts/demo-mvp.sh`
+

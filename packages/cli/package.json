@@ -22,9 +22,12 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "@graft/compile": "*",
     "@graft/ingestion": "*",
     "@graft/linking": "*",
+    "@graft/mcp-server": "*",
     "@graft/pipeline": "*",
+    "@graft/retrieval": "*",
     "@graft/shared": "*"
   }
 }

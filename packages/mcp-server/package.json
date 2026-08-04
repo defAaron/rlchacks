@@ -17,5 +17,12 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@graft/compile": "*",
+    "@graft/retrieval": "*",
+    "@graft/shared": "*",
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^4.4.3"
   }
 }

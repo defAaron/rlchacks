@@ -1,0 +1,7 @@
+diff --git a/src/types.ts b/src/types.ts
+index 1111111..2222222 100644
+--- a/src/types.ts
++++ b/src/types.ts
+@@ -1 +1 @@
+-export function handle(value: unknown) {
++export function handle(value: any) {

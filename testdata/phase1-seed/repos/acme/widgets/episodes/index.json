@@ -1,0 +1,15 @@
+{
+  "repo": "acme/widgets",
+  "updatedAt": "2026-08-04T00:21:33.923Z",
+  "episodes": [
+    {
+      "id": "ep_a4026633ce7133ef",
+      "prNumber": 101,
+      "commentId": "PRRC_kwDOFixtureComment1",
+      "path": "src/retry.ts",
+      "linkConfidence": "medium",
+      "linkReason": "rejected_from_line_blob+overlap_lexical",
+      "actionable": true
+    }
+  ]
+}

@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 import { pathToFileURL } from "node:url";
 import {
+  compileRepository,
+  type CompileRepositoryResult,
+} from "@graft/compile";
+import {
   createGitHubClientFromEnv,
   GitHubAccessError,
   ingestRepository,
@@ -20,6 +24,19 @@ import {
   writeCursors,
 } from "@graft/pipeline";
 import {
+  explainRecipe,
+  formatStaleBanner,
+  getFreshnessSummary,
+  listRecipes,
+  loadRecipeIndex,
+  suggestGrafts,
+  type ExplainRecipeResult,
+  type FreshnessSummary,
+  type ListRecipesResult,
+  type SuggestGraftsResult,
+} from "@graft/retrieval";
+import { runStdioServer } from "@graft/mcp-server";
+import {
   CLI_EXIT,
   GraftError,
   GraftErrorCodes,
@@ -27,6 +44,7 @@ import {
   resolveGraftConfig,
   toPrintableResolvedConfig,
   type Cursors,
+  type CompileCursor,
   type IngestCursor,
   type LinkCursor,
 } from "@graft/shared";
@@ -89,6 +107,66 @@ export type LinkCliSummary = {
   episodeLabels: LinkEpisodeLabel[];
 };
 
+export type CompileCliOptions = {
+  repo: string;
+};
+
+export type RunCompileOptions = {
+  repo: string;
+  env?: NodeJS.ProcessEnv;
+  now?: () => number;
+  log?: (line: string) => void;
+};
+
+export type CompileCliSummary = {
+  repo: string;
+  recipes: number;
+  eligibleEpisodes: number;
+  inputEpisodes: number;
+  clustersFormed: number;
+  durationMs: number;
+  compileWatermark: CompileCursor;
+  staleBanner: string | null;
+};
+
+export type SuggestCliOptions = {
+  repo: string;
+  diffFile?: string;
+  pathHint?: string;
+};
+
+export type RunSuggestOptions = {
+  repo: string;
+  diff?: string;
+  pathHint?: string;
+  env?: NodeJS.ProcessEnv;
+  log?: (line: string) => void;
+};
+
+export type SuggestCliSummary = {
+  repo: string;
+  suggestions: SuggestGraftsResult["suggestions"];
+  warnings: string[];
+  staleBanner: string | null;
+  freshness: FreshnessSummary;
+};
+
+export type RecipesListCliOptions = {
+  repo: string;
+  path?: string;
+  language?: string;
+  q?: string;
+};
+
+export type RecipesExplainCliOptions = {
+  repo: string;
+  recipeId: string;
+};
+
+export type ServeMcpCliOptions = {
+  repo?: string;
+};
+
 export type MainOptions = {
   env?: NodeJS.ProcessEnv;
   /** Override stderr for tests (default `console.error`). */
@@ -102,11 +180,20 @@ function printUsage(error: (line: string) => void = console.error): void {
   graft config [--repo owner/name] [--init]
   graft ingest <owner/repo> [--max-prs 200]
   graft link <owner/repo>
+  graft compile <owner/repo>
+  graft suggest <owner/repo> [--diff file|-] [--path hint]
+  graft recipes list <owner/repo> [--path prefix] [--language lang] [--q text]
+  graft recipes explain <owner/repo> <recipe-id>
+  graft serve mcp [--repo owner/name]
 
 Commands:
   config   Print resolved Graft config for a repo (no network)
   ingest   Fetch merged PR review history into raw artifacts (ING-1)
   link     Link raw comments into review episodes (LNK-1…5; LLM opt-in)
+  compile  Cluster episodes into rewrite recipes (RCP-1…4)
+  suggest  Match recipes to a unified diff and rank suggestions (RET-2…5)
+  recipes  List or explain compiled recipes
+  serve    Start MCP stdio server for coding agents (MCP-1…3)
 
 Exit codes (TRD §9):
   0  ok
@@ -240,6 +327,242 @@ export function parseLinkArgs(args: string[]): LinkCliOptions {
 
   parseRepoSlug(repo);
   return { repo };
+}
+
+export function parseCompileArgs(args: string[]): CompileCliOptions {
+  let repo: string | undefined;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === undefined) {
+      continue;
+    }
+    if (arg === "--help" || arg === "-h") {
+      printUsage();
+      process.exit(0);
+    }
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+    if (repo !== undefined) {
+      throw new Error(`Unexpected argument: ${arg}`);
+    }
+    repo = arg;
+  }
+
+  if (repo === undefined) {
+    throw new Error("Missing repo; usage: graft compile <owner/repo>");
+  }
+
+  parseRepoSlug(repo);
+  return { repo };
+}
+
+export function parseSuggestArgs(args: string[]): SuggestCliOptions {
+  let repo: string | undefined;
+  let diffFile: string | undefined;
+  let pathHint: string | undefined;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === undefined) {
+      continue;
+    }
+    if (arg === "--help" || arg === "-h") {
+      printUsage();
+      process.exit(0);
+    }
+    if (arg === "--diff") {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith("-")) {
+        throw new Error("--diff requires a file path or -");
+      }
+      diffFile = value;
+      i++;
+      continue;
+    }
+    if (arg === "--path") {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith("-")) {
+        throw new Error("--path requires a path hint");
+      }
+      pathHint = value;
+      i++;
+      continue;
+    }
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+    if (repo !== undefined) {
+      throw new Error(`Unexpected argument: ${arg}`);
+    }
+    repo = arg;
+  }
+
+  if (repo === undefined) {
+    throw new Error("Missing repo; usage: graft suggest <owner/repo> [--diff file]");
+  }
+
+  parseRepoSlug(repo);
+  const result: SuggestCliOptions = { repo };
+  if (diffFile !== undefined) {
+    result.diffFile = diffFile;
+  }
+  if (pathHint !== undefined) {
+    result.pathHint = pathHint;
+  }
+  return result;
+}
+
+export function parseRecipesListArgs(args: string[]): RecipesListCliOptions {
+  let repo: string | undefined;
+  let pathPrefix: string | undefined;
+  let language: string | undefined;
+  let q: string | undefined;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === undefined) {
+      continue;
+    }
+    if (arg === "--help" || arg === "-h") {
+      printUsage();
+      process.exit(0);
+    }
+    if (arg === "--path") {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith("-")) {
+        throw new Error("--path requires a prefix");
+      }
+      pathPrefix = value;
+      i++;
+      continue;
+    }
+    if (arg === "--language") {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith("-")) {
+        throw new Error("--language requires a value");
+      }
+      language = value;
+      i++;
+      continue;
+    }
+    if (arg === "--q") {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith("-")) {
+        throw new Error("--q requires a query string");
+      }
+      q = value;
+      i++;
+      continue;
+    }
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+    if (repo !== undefined) {
+      throw new Error(`Unexpected argument: ${arg}`);
+    }
+    repo = arg;
+  }
+
+  if (repo === undefined) {
+    throw new Error(
+      "Missing repo; usage: graft recipes list <owner/repo> [--path prefix]",
+    );
+  }
+
+  parseRepoSlug(repo);
+  const result: RecipesListCliOptions = { repo };
+  if (pathPrefix !== undefined) {
+    result.path = pathPrefix;
+  }
+  if (language !== undefined) {
+    result.language = language;
+  }
+  if (q !== undefined) {
+    result.q = q;
+  }
+  return result;
+}
+
+export function parseRecipesExplainArgs(args: string[]): RecipesExplainCliOptions {
+  let repo: string | undefined;
+  let recipeId: string | undefined;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === undefined) {
+      continue;
+    }
+    if (arg === "--help" || arg === "-h") {
+      printUsage();
+      process.exit(0);
+    }
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+    if (repo === undefined) {
+      repo = arg;
+      continue;
+    }
+    if (recipeId === undefined) {
+      recipeId = arg;
+      continue;
+    }
+    throw new Error(`Unexpected argument: ${arg}`);
+  }
+
+  if (repo === undefined) {
+    throw new Error(
+      "Missing repo; usage: graft recipes explain <owner/repo> <recipe-id>",
+    );
+  }
+  if (recipeId === undefined) {
+    throw new Error("Missing recipe id");
+  }
+
+  parseRepoSlug(repo);
+  return { repo, recipeId };
+}
+
+export function parseServeMcpArgs(args: string[]): ServeMcpCliOptions {
+  let repo: string | undefined;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === undefined) {
+      continue;
+    }
+    if (arg === "--help" || arg === "-h") {
+      printUsage();
+      process.exit(0);
+    }
+    if (arg === "--repo") {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith("-")) {
+        throw new Error("--repo requires owner/name");
+      }
+      repo = value;
+      i++;
+      continue;
+    }
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+    if (repo !== undefined) {
+      throw new Error(`Unexpected argument: ${arg}`);
+    }
+    repo = arg;
+  }
+
+  if (repo !== undefined) {
+    parseRepoSlug(repo);
+  }
+  const result: ServeMcpCliOptions = {};
+  if (repo !== undefined) {
+    result.repo = repo;
+  }
+  return result;
 }
 
 function mergeIngestWatermark(
@@ -461,6 +784,223 @@ export async function runLink(
   return summary;
 }
 
+async function persistCompileWatermark(
+  dataDir: string,
+  owner: string,
+  name: string,
+  updatedAt: string,
+  compileRunId: string,
+): Promise<Cursors> {
+  const existing = (await readCursors(dataDir, owner, name)) ?? defaultCursors();
+  const updated: Cursors = {
+    ...existing,
+    compile: { updatedAt, compileRunId },
+  };
+  await writeCursors(dataDir, owner, name, updated);
+  return updated;
+}
+
+function formatCompileSummary(summary: CompileCliSummary): string {
+  return JSON.stringify(summary, null, 2);
+}
+
+/**
+ * Run `graft compile` — episodes → recipes; updates compile watermark.
+ */
+export async function runCompile(
+  options: RunCompileOptions,
+): Promise<CompileCliSummary> {
+  const env = options.env ?? process.env;
+  const log = options.log ?? ((line: string) => console.log(line));
+  const now = options.now ?? Date.now;
+
+  const resolved = await resolveGraftConfig({
+    repo: options.repo,
+    env,
+    init: true,
+  });
+  const { owner, name } = resolved.repo;
+  const dataDir = resolved.paths.dataDir;
+
+  const freshness = await getFreshnessSummary(dataDir, owner, name);
+  const staleBanner = formatStaleBanner(freshness);
+
+  const started = now();
+  const result: CompileRepositoryResult = await compileRepository({
+    dataDir,
+    owner,
+    name,
+    minSupport: resolved.repoConfig.compile.minSupport,
+    allowSingleHighConfidence:
+      resolved.repoConfig.compile.allowSingleHighConfidence,
+    now: () => new Date(now()),
+  });
+  const durationMs = Math.max(0, now() - started);
+
+  const cursors = await persistCompileWatermark(
+    dataDir,
+    owner,
+    name,
+    result.updatedAt,
+    result.compileRunId,
+  );
+
+  const summary: CompileCliSummary = {
+    repo: result.repo,
+    recipes: result.recipesWritten,
+    eligibleEpisodes: result.eligibleEpisodes,
+    inputEpisodes: result.inputEpisodes,
+    clustersFormed: result.clustersFormed,
+    durationMs,
+    compileWatermark: cursors.compile,
+    staleBanner,
+  };
+
+  if (staleBanner !== null) {
+    log(staleBanner);
+  }
+  log(formatCompileSummary(summary));
+  return summary;
+}
+
+async function readDiffInput(diffFile?: string): Promise<string> {
+  if (diffFile === undefined) {
+    throw new Error("--diff is required; usage: graft suggest <owner/repo> --diff file|-");
+  }
+  if (diffFile === "-") {
+    const { stdin } = await import("node:process");
+    const chunks: Buffer[] = [];
+    for await (const chunk of stdin) {
+      chunks.push(typeof chunk === "string" ? Buffer.from(chunk) : chunk);
+    }
+    return Buffer.concat(chunks).toString("utf8");
+  }
+  const { readFile } = await import("node:fs/promises");
+  return readFile(diffFile, "utf8");
+}
+
+function formatSuggestSummary(summary: SuggestCliSummary): string {
+  return JSON.stringify(summary, null, 2);
+}
+
+/**
+ * Run `graft suggest` — match diff against recipes; evidence required.
+ */
+export async function runSuggest(
+  options: RunSuggestOptions,
+): Promise<SuggestCliSummary> {
+  const env = options.env ?? process.env;
+  const log = options.log ?? ((line: string) => console.log(line));
+
+  const resolved = await resolveGraftConfig({
+    repo: options.repo,
+    env,
+    init: false,
+  });
+  const { owner, name } = resolved.repo;
+  const dataDir = resolved.paths.dataDir;
+
+  const freshness = await getFreshnessSummary(dataDir, owner, name);
+  const staleBanner = formatStaleBanner(freshness);
+
+  const loaded = await loadRecipeIndex({ dataDir, owner, name });
+  if (options.diff === undefined || options.diff.trim() === "") {
+    throw new Error(
+      "--diff is required; usage: graft suggest <owner/repo> --diff file|-",
+    );
+  }
+
+  const result = await suggestGrafts({
+    dataDir,
+    owner,
+    name,
+    recipes: loaded.recipes,
+    diff: options.diff,
+    ...(options.pathHint !== undefined ? { pathHint: options.pathHint } : {}),
+  });
+
+  const summary: SuggestCliSummary = {
+    repo: loaded.repo,
+    suggestions: result.suggestions,
+    warnings: result.warnings,
+    staleBanner,
+    freshness,
+  };
+
+  if (staleBanner !== null) {
+    log(staleBanner);
+  }
+  log(formatSuggestSummary(summary));
+  return summary;
+}
+
+function formatListSummary(result: ListRecipesResult & { repo: string; staleBanner: string | null }): string {
+  return JSON.stringify(result, null, 2);
+}
+
+export async function runRecipesList(
+  options: RecipesListCliOptions & { env?: NodeJS.ProcessEnv; log?: (line: string) => void },
+): Promise<ListRecipesResult & { repo: string; staleBanner: string | null }> {
+  const env = options.env ?? process.env;
+  const log = options.log ?? ((line: string) => console.log(line));
+
+  const resolved = await resolveGraftConfig({
+    repo: options.repo,
+    env,
+    init: false,
+  });
+  const { owner, name } = resolved.repo;
+  const dataDir = resolved.paths.dataDir;
+
+  const freshness = await getFreshnessSummary(dataDir, owner, name);
+  const staleBanner = formatStaleBanner(freshness);
+
+  const loaded = await loadRecipeIndex({ dataDir, owner, name });
+  const listOpts: Parameters<typeof listRecipes>[1] = {};
+  if (options.path !== undefined) {
+    listOpts.path = options.path;
+  }
+  if (options.language !== undefined) {
+    listOpts.language = options.language;
+  }
+  if (options.q !== undefined) {
+    listOpts.q = options.q;
+  }
+
+  const listed = listRecipes(loaded.recipes, listOpts);
+  const output = { repo: loaded.repo, staleBanner, ...listed };
+
+  if (staleBanner !== null) {
+    log(staleBanner);
+  }
+  log(formatListSummary(output));
+  return output;
+}
+
+export async function runRecipesExplain(
+  options: RecipesExplainCliOptions & { env?: NodeJS.ProcessEnv; log?: (line: string) => void },
+): Promise<ExplainRecipeResult> {
+  const env = options.env ?? process.env;
+  const log = options.log ?? ((line: string) => console.log(line));
+
+  const resolved = await resolveGraftConfig({
+    repo: options.repo,
+    env,
+    init: false,
+  });
+  const { owner, name } = resolved.repo;
+  const dataDir = resolved.paths.dataDir;
+
+  const result = await explainRecipe(
+    dataDir,
+    owner,
+    name,
+    options.recipeId,
+  );
+  log(JSON.stringify(result, null, 2));
+  return result;
+}
+
 async function runLinkCommand(
   args: string[],
   options: MainOptions,
@@ -473,6 +1013,91 @@ async function runLinkCommand(
     linkOpts.env = options.env;
   }
   await runLink(linkOpts);
+}
+
+async function runCompileCommand(
+  args: string[],
+  options: MainOptions,
+): Promise<void> {
+  const opts = parseCompileArgs(args);
+  const compileOpts: RunCompileOptions = { repo: opts.repo };
+  if (options.env !== undefined) {
+    compileOpts.env = options.env;
+  }
+  await runCompile(compileOpts);
+}
+
+async function runSuggestCommand(
+  args: string[],
+  options: MainOptions,
+): Promise<void> {
+  const opts = parseSuggestArgs(args);
+  const diff =
+    opts.diffFile !== undefined ? await readDiffInput(opts.diffFile) : undefined;
+  const suggestOpts: RunSuggestOptions = { repo: opts.repo };
+  if (options.env !== undefined) {
+    suggestOpts.env = options.env;
+  }
+  if (diff !== undefined) {
+    suggestOpts.diff = diff;
+  }
+  if (opts.pathHint !== undefined) {
+    suggestOpts.pathHint = opts.pathHint;
+  }
+  await runSuggest(suggestOpts);
+}
+
+async function runRecipesCommand(
+  args: string[],
+  options: MainOptions,
+): Promise<void> {
+  const [sub, ...rest] = args;
+  if (sub === "list") {
+    const opts = parseRecipesListArgs(rest);
+    const listOpts = { ...opts };
+    if (options.env !== undefined) {
+      Object.assign(listOpts, { env: options.env });
+    }
+    await runRecipesList(listOpts);
+    return;
+  }
+  if (sub === "explain") {
+    const opts = parseRecipesExplainArgs(rest);
+    const explainOpts = { ...opts };
+    if (options.env !== undefined) {
+      Object.assign(explainOpts, { env: options.env });
+    }
+    await runRecipesExplain(explainOpts);
+    return;
+  }
+  throw new Error(
+    sub === undefined
+      ? "Missing recipes subcommand; use list or explain"
+      : `Unknown recipes subcommand: ${sub}`,
+  );
+}
+
+async function runServeCommand(
+  args: string[],
+  options: MainOptions,
+): Promise<void> {
+  const [sub, ...rest] = args;
+  if (sub !== "mcp") {
+    throw new Error(
+      sub === undefined
+        ? "Missing serve subcommand; use mcp"
+        : `Unknown serve subcommand: ${sub}`,
+    );
+  }
+  const opts = parseServeMcpArgs(rest);
+  const serveOpts: Parameters<typeof runStdioServer>[0] = {};
+  if (options.env !== undefined) {
+    serveOpts.env = options.env;
+  }
+  if (opts.repo !== undefined) {
+    serveOpts.repo = opts.repo;
+  }
+  await runStdioServer(serveOpts);
 }
 
 export async function main(
@@ -501,6 +1126,26 @@ export async function main(
 
     if (command === "link") {
       await runLinkCommand(rest, options);
+      return CLI_EXIT.OK;
+    }
+
+    if (command === "compile") {
+      await runCompileCommand(rest, options);
+      return CLI_EXIT.OK;
+    }
+
+    if (command === "suggest") {
+      await runSuggestCommand(rest, options);
+      return CLI_EXIT.OK;
+    }
+
+    if (command === "recipes") {
+      await runRecipesCommand(rest, options);
+      return CLI_EXIT.OK;
+    }
+
+    if (command === "serve") {
+      await runServeCommand(rest, options);
       return CLI_EXIT.OK;
     }
 

@@ -1,0 +1,20 @@
+{
+  "owner": "acme",
+  "name": "widgets",
+  "defaultBranch": "main",
+  "backfill": {
+    "maxPrs": 200,
+    "since": null
+  },
+  "compile": {
+    "minSupport": 2,
+    "allowSingleHighConfidence": false
+  },
+  "paths": {
+    "include": [],
+    "exclude": [
+      "**/vendor/**",
+      "**/dist/**"
+    ]
+  }
+}

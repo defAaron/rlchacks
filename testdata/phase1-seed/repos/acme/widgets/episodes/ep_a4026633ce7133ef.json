@@ -1,0 +1,31 @@
+{
+  "id": "ep_a4026633ce7133ef",
+  "repo": "acme/widgets",
+  "prNumber": 101,
+  "commentId": "PRRC_kwDOFixtureComment1",
+  "path": "src/retry.ts",
+  "language": "typescript",
+  "commentBody": "Prefer early return: throw on the last attempt instead of nested try/catch.",
+  "rejected": {
+    "path": "src/retry.ts",
+    "startLine": 7,
+    "endLine": 7,
+    "sha": "blobsha2222222222222222222222222222222222",
+    "text": "      lastError = err;",
+    "normalized": "lastError=err;"
+  },
+  "accepted": {
+    "path": "src/retry.ts",
+    "startLine": 7,
+    "endLine": 7,
+    "sha": "blobsha1111111111111111111111111111111111",
+    "text": "      if (i === attempts - 1) throw err;",
+    "normalized": "if(i===attempts-N)throwerr;"
+  },
+  "linkConfidence": "medium",
+  "linkReason": "rejected_from_line_blob+overlap_lexical",
+  "actionable": true,
+  "discardReason": null,
+  "reviewer": "reviewer1",
+  "mergedAt": "2024-06-15T12:00:00Z"
+}

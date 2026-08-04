@@ -11,10 +11,11 @@
     "node": ">=22"
   },
   "scripts": {
-    "build": "npm run build -w @graft/shared && npm run build -w @graft/ingestion -w @graft/pipeline -w @graft/linking && npm run build --workspaces --if-present",
-    "typecheck": "npm run build -w @graft/shared && npm run build -w @graft/ingestion -w @graft/pipeline -w @graft/linking && npm run typecheck --workspaces --if-present",
+    "build": "npm run build -w @graft/shared && npm run build -w @graft/ingestion -w @graft/pipeline -w @graft/linking && npm run build -w @graft/compile && npm run build -w @graft/retrieval && npm run build -w @graft/mcp-server && npm run build --workspaces --if-present",
+    "typecheck": "npm run build -w @graft/shared && npm run build -w @graft/ingestion -w @graft/pipeline -w @graft/linking && npm run build -w @graft/compile && npm run build -w @graft/retrieval && npm run build -w @graft/mcp-server && npm run typecheck --workspaces --if-present",
     "test": "vitest run",
-    "graft": "node packages/cli/dist/index.js"
+    "graft": "node packages/cli/dist/index.js",
+    "mcp": "node packages/cli/dist/index.js serve mcp"
   },
   "devDependencies": {
     "@types/node": "^22.13.0",
