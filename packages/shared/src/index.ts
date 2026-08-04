@@ -21,6 +21,7 @@ export {
   repoDataRoot,
   repoScopedPath,
   repoScopedPathFromSlug,
+  listIngestedRepos,
   type RepoRef,
 } from "./paths.js";
 
@@ -73,3 +74,23 @@ export {
   type Cursors,
   type RepoConfig,
 } from "./schemas.js";
+
+export {
+  redactSecrets,
+  containsRedactableSecrets,
+  REDACT_PATTERNS,
+  type RedactPattern,
+} from "./redact.js";
+
+export {
+  parseRepoAllowlist,
+  normalizeRepoSlug,
+  assertRepoAllowed,
+} from "./allowlist.js";
+
+export {
+  parseMergeWebhookPayload,
+  verifyGitHubWebhookSignature,
+  type GitHubPullRequestEvent,
+  type ParsedMergeEvent,
+} from "./webhook.js";

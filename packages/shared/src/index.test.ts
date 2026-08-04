@@ -148,6 +148,7 @@ describe("error codes", () => {
       "GRAFT_NOT_FOUND",
       "GRAFT_INVALID_DIFF",
       "GRAFT_BUDGET",
+      "GRAFT_REPO_FORBIDDEN",
     ]);
     expect(GraftErrorCodes.GRAFT_NO_DATA).toBe("GRAFT_NO_DATA");
   });

@@ -8,8 +8,13 @@ dist/
 # Local artifacts / secrets
 data/
 .env
+.env.*
 .env.local
 .env.*.local
+*.pem
+*.key
+credentials.json
+secrets.json
 
 # Test / coverage
 coverage/

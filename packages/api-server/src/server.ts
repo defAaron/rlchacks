@@ -8,6 +8,7 @@ import { createHandler } from "graphql-http/lib/use/node";
 import { GraphQLError } from "graphql";
 import { resolveGraftConfig } from "@graft/shared";
 import { resolveApiContext, type ApiContext } from "./context.js";
+import { isDashboardRequest, serveDashboard } from "./dashboard.js";
 import { resolvers } from "./resolvers.js";
 import { typeDefs } from "./schema.js";
 
@@ -85,6 +86,11 @@ export function createApiHandler(
       res.statusCode = 200;
       res.setHeader("content-type", "application/json");
       res.end(JSON.stringify({ status: "ok", repo: config.repoSlug }));
+      return;
+    }
+
+    if (req.method === "GET" && isDashboardRequest(url)) {
+      await serveDashboard(res);
       return;
     }
 

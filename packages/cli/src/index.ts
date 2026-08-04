@@ -41,6 +41,10 @@ import { runStdioServer } from "@graft/mcp-server";
 import { runApiServer } from "@graft/api-server";
 import { purgeRepository } from "@graft/pipeline";
 import {
+  runWebhookServer,
+  type WebhookPipelineRunner,
+} from "./webhook-server.js";
+import {
   CLI_EXIT,
   GraftError,
   GraftErrorCodes,
@@ -187,6 +191,11 @@ export type ServeApiCliOptions = {
   port?: number;
 };
 
+export type ServeWebhookCliOptions = {
+  host?: string;
+  port?: number;
+};
+
 export type MainOptions = {
   env?: NodeJS.ProcessEnv;
   /** Override stderr for tests (default `console.error`). */
@@ -208,6 +217,7 @@ function printUsage(error: (line: string) => void = console.error): void {
   graft purge <owner/repo>
   graft serve mcp [--repo owner/name]
   graft serve api [--repo owner/name] [--host host] [--port n]
+  graft serve webhook [--host host] [--port n]
 
 Commands:
   config   Print resolved Graft config for a repo (no network)
@@ -217,7 +227,7 @@ Commands:
   suggest  Match recipes to a unified diff and rank suggestions (RET-2…5)
   recipes  List, explain, or suppress compiled recipes
   purge    Delete all artifact data for a repo (SAF-5)
-  serve    Start MCP stdio server or HTTP GraphQL API (DEV-5)
+  serve    Start MCP stdio server, HTTP GraphQL API, or merge webhook (DEV-5, ING-5)
 
 Exit codes (TRD §9):
   0  ok
@@ -730,6 +740,57 @@ export function parseServeApiArgs(args: string[]): ServeApiCliOptions {
   if (repo !== undefined) {
     result.repo = repo;
   }
+  if (host !== undefined) {
+    result.host = host;
+  }
+  if (port !== undefined) {
+    result.port = port;
+  }
+  return result;
+}
+
+export function parseServeWebhookArgs(args: string[]): ServeWebhookCliOptions {
+  let host: string | undefined;
+  let port: number | undefined;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === undefined) {
+      continue;
+    }
+    if (arg === "--help" || arg === "-h") {
+      printUsage();
+      process.exit(0);
+    }
+    if (arg === "--host") {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith("-")) {
+        throw new Error("--host requires a value");
+      }
+      host = value;
+      i++;
+      continue;
+    }
+    if (arg === "--port") {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith("-")) {
+        throw new Error("--port requires a positive integer");
+      }
+      const parsed = Number.parseInt(value, 10);
+      if (!Number.isInteger(parsed) || parsed < 1) {
+        throw new Error(`--port must be a positive integer; got ${value}`);
+      }
+      port = parsed;
+      i++;
+      continue;
+    }
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+    throw new Error(`Unexpected argument: ${arg}`);
+  }
+
+  const result: ServeWebhookCliOptions = {};
   if (host !== undefined) {
     result.host = host;
   }
@@ -1327,6 +1388,53 @@ async function runServeCommand(
   options: MainOptions,
 ): Promise<void> {
   const [sub, ...rest] = args;
+  if (sub === "webhook") {
+    const opts = parseServeWebhookArgs(rest);
+    const env = options.env ?? process.env;
+    const runner: WebhookPipelineRunner = {
+      runIngest: async (repoSlug, maxPrs) => {
+        const ingestOpts: RunIngestOptions = {
+          repo: repoSlug,
+          maxPrs: maxPrs ?? 5,
+          env,
+        };
+        if (options.client !== undefined) {
+          ingestOpts.client = options.client;
+        }
+        await runIngest(ingestOpts);
+      },
+      runLink: async (repoSlug) => {
+        await runLink({ repo: repoSlug, env });
+      },
+      runCompile: async (repoSlug) => {
+        await runCompile({ repo: repoSlug, env });
+      },
+    };
+    const serveOpts: Parameters<typeof runWebhookServer>[0] = { runner, env };
+    if (opts.host !== undefined) {
+      serveOpts.host = opts.host;
+    }
+    if (opts.port !== undefined) {
+      serveOpts.port = opts.port;
+    }
+    const started = await runWebhookServer(serveOpts);
+    console.log(
+      JSON.stringify(
+        {
+          status: "listening",
+          host: started.host,
+          port: started.port,
+          webhook: `http://${started.host}:${started.port}/webhook`,
+        },
+        null,
+        2,
+      ),
+    );
+    await new Promise<void>(() => {
+      /* block until signal */
+    });
+    return;
+  }
   if (sub !== "mcp") {
     if (sub === "api") {
       const opts = parseServeApiArgs(rest);
@@ -1364,7 +1472,7 @@ async function runServeCommand(
     }
     throw new Error(
       sub === undefined
-        ? "Missing serve subcommand; use mcp or api"
+        ? "Missing serve subcommand; use mcp, api, or webhook"
         : `Unknown serve subcommand: ${sub}`,
     );
   }

@@ -12,7 +12,8 @@
   "activationEvents": [
     "onCommand:graft.suggest",
     "onCommand:graft.previewSuggestion",
-    "onCommand:graft.applyPreview"
+    "onCommand:graft.applyPreview",
+    "onStartupFinished"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -47,6 +48,17 @@
           "type": "string",
           "default": "",
           "description": "Repo slug owner/name (defaults to workspace hint)"
+        },
+        "graft.diagnosticsOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show soft info diagnostics when high-support recipes match on save (DEV-3)"
+        },
+        "graft.diagnosticsMinSupport": {
+          "type": "number",
+          "default": 2,
+          "minimum": 1,
+          "description": "Minimum recipe support count for save diagnostics"
         }
       }
     }

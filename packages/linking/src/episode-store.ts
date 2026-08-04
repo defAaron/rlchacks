@@ -5,6 +5,7 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import {
   parseArtifact,
+  redactSecrets,
   repoScopedPath,
   ReviewEpisodeSchema,
   type LinkConfidence,
@@ -89,6 +90,26 @@ export function truncateBodyPreview(body: string): string {
   return `${oneLine.slice(0, BODY_PREVIEW_MAX - 1)}…`;
 }
 
+export function redactEpisodeForPersist(episode: ReviewEpisode): ReviewEpisode {
+  return {
+    ...episode,
+    commentBody: redactSecrets(episode.commentBody),
+    rejected: {
+      ...episode.rejected,
+      text: redactSecrets(episode.rejected.text),
+      normalized: redactSecrets(episode.rejected.normalized),
+    },
+    accepted:
+      episode.accepted === null
+        ? null
+        : {
+            ...episode.accepted,
+            text: redactSecrets(episode.accepted.text),
+            normalized: redactSecrets(episode.accepted.normalized),
+          },
+  };
+}
+
 export async function writeReviewEpisode(
   dataDir: string,
   owner: string,
@@ -100,13 +121,14 @@ export async function writeReviewEpisode(
     episode,
     "ReviewEpisode",
   );
-  const filePath = episodePath(dataDir, owner, name, validated.id);
+  const redacted = redactEpisodeForPersist(validated);
+  const filePath = episodePath(dataDir, owner, name, redacted.id);
   await mkdir(repoScopedPath(dataDir, owner, name, "episodes"), {
     recursive: true,
   });
   await writeFile(
     filePath,
-    `${JSON.stringify(validated, null, 2)}\n`,
+    `${JSON.stringify(redacted, null, 2)}\n`,
     "utf8",
   );
   return filePath;

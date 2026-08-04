@@ -6,6 +6,7 @@ import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import {
   parseArtifact,
+  redactSecrets,
   repoScopedPath,
   RewriteRecipeSchema,
   type RewriteRecipe,
@@ -179,9 +180,15 @@ export async function writeRewriteRecipe(
   recipe: RewriteRecipe,
 ): Promise<string> {
   const validated = parseArtifact(RewriteRecipeSchema, recipe, "RewriteRecipe");
-  const filePath = recipePath(dataDir, owner, name, validated.id);
+  const redacted: RewriteRecipe = {
+    ...validated,
+    before: redactSecrets(validated.before),
+    after: redactSecrets(validated.after),
+    rationale: redactSecrets(validated.rationale),
+  };
+  const filePath = recipePath(dataDir, owner, name, redacted.id);
   await mkdir(recipesDir(dataDir, owner, name), { recursive: true });
-  await writeFile(filePath, `${JSON.stringify(validated, null, 2)}\n`, "utf8");
+  await writeFile(filePath, `${JSON.stringify(redacted, null, 2)}\n`, "utf8");
   return filePath;
 }
 

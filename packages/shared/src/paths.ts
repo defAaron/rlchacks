@@ -1,3 +1,4 @@
+import { readdir } from "node:fs/promises";
 import path from "node:path";
 
 /** Default artifact root when `DATA_DIR` is unset (TRD §5.1). */
@@ -108,4 +109,39 @@ export function repoScopedPathFromSlug(
 ): string {
   const { owner, name } = parseRepoSlug(repo);
   return repoScopedPath(dataDir, owner, name, ...segments);
+}
+
+/** List `owner/name` slugs with data directories under `DATA_DIR/repos/`. */
+export async function listIngestedRepos(dataDir: string): Promise<string[]> {
+  const reposRoot = path.join(dataDir, "repos");
+  let owners: string[];
+  try {
+    owners = await readdir(reposRoot);
+  } catch {
+    return [];
+  }
+  const slugs: string[] = [];
+  for (const owner of owners) {
+    if (owner.startsWith(".")) {
+      continue;
+    }
+    let names: string[];
+    try {
+      names = await readdir(path.join(reposRoot, owner));
+    } catch {
+      continue;
+    }
+    for (const name of names) {
+      if (name.startsWith(".")) {
+        continue;
+      }
+      try {
+        parseRepoSlug(`${owner}/${name}`);
+        slugs.push(`${owner}/${name}`);
+      } catch {
+        /* skip invalid directory names */
+      }
+    }
+  }
+  return slugs.sort();
 }

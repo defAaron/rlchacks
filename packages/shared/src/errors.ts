@@ -5,6 +5,8 @@ export const GraftErrorCodes = {
   GRAFT_NOT_FOUND: "GRAFT_NOT_FOUND",
   GRAFT_INVALID_DIFF: "GRAFT_INVALID_DIFF",
   GRAFT_BUDGET: "GRAFT_BUDGET",
+  /** Repo not in configured allowlist (Phase 8.5 / SAF-1). */
+  GRAFT_REPO_FORBIDDEN: "GRAFT_REPO_FORBIDDEN",
 } as const;
 
 export type GraftErrorCode =

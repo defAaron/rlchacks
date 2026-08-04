@@ -14,3 +14,5 @@ export {
   runApiServer,
   type RunApiServerOptions,
 } from "./server.js";
+
+export { serveDashboard, isDashboardRequest, dashboardIndexPath } from "./dashboard.js";

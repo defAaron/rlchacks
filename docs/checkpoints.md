@@ -314,3 +314,25 @@ Record date, demo repo, recipe count, and known issues at each phase exit.
 - Docs: `docs/MCP.md`, README quick start, `docs/DATA_FORMAT.md`, `docs/PIPELINE.md` stubs
 - Demo: `scripts/demo-mvp.sh`
 
+---
+
+## Checkpoint 8 — 2026-08-03
+- Phase: 8 (Soft diagnostics, dashboard, webhook, multi-repo, redaction — v0.3 SHIP GATE)
+- Pass / fail: **pass**
+- Demo repo: fixture `acme/widgets`
+- Episodes / recipes: unchanged golden fixtures; multi-repo isolation tested synthetically
+- LLM enabled: no (`GRAFT_LLM_ENABLED=false`)
+- Known issues: live webhook requires `GITHUB_TOKEN` + `GITHUB_WEBHOOK_SECRET`; dashboard served at `/dashboard` via API server (static HTML, not Next.js)
+- Next phase: Phase 9 — Hardening (not started)
+
+### Checks
+
+| Check | Status | Notes |
+| --- | --- | --- |
+| PRD v0.3 | **pass** | DEV-3, DEV-4, ING-5, SAF-3, multi-repo allowlist |
+| Soft-only | **pass** | VS Code save diagnostics use Information severity; never block save |
+| Privacy | **pass** | Redaction tests green; LLM still opt-in |
+| Ops | **pass** | Webhook serial queue; failed ingest skips link/compile |
+| Tag | _pending_ | User to tag `v0.3.0` when ready |
+| Tests | **pass** | 34 files / 196 tests green |
+

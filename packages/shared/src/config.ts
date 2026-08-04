@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { assertRepoAllowed, parseRepoAllowlist } from "./allowlist.js";
 import { GraftArtifactParseError } from "./errors.js";
 import { parseArtifact } from "./parse.js";
 import {
@@ -32,6 +33,10 @@ export type GraftEnv = {
   apiToken: string | undefined;
   apiHost: string;
   apiPort: number;
+  /** Optional webhook HMAC secret (ING-5). */
+  webhookSecret: string | undefined;
+  /** Comma-separated repo allowlist; null = unrestricted (Phase 8.5). */
+  repoAllowlist: string[] | null;
 };
 
 export type ResolveGraftConfigOptions = {
@@ -124,6 +129,12 @@ export function loadGraftEnv(env: NodeJS.ProcessEnv = process.env): GraftEnv {
         ? env.API_HOST.trim()
         : "127.0.0.1",
     apiPort: parsePositiveIntEnv(env.API_PORT, 8787).value,
+    webhookSecret:
+      env.GITHUB_WEBHOOK_SECRET !== undefined &&
+      env.GITHUB_WEBHOOK_SECRET.trim() !== ""
+        ? env.GITHUB_WEBHOOK_SECRET.trim()
+        : undefined,
+    repoAllowlist: parseRepoAllowlist(env.GRAFT_REPO_ALLOWLIST),
   };
 }
 
@@ -233,6 +244,7 @@ export async function resolveGraftConfig(
   const envMap = options.env ?? process.env;
   const graftEnv = loadGraftEnv(envMap);
   const repoSlug = resolveRepoSlug(options, graftEnv);
+  assertRepoAllowed(repoSlug, graftEnv.repoAllowlist);
   const { owner, name } = parseRepoSlug(repoSlug);
 
   const dataDir = graftEnv.dataDir;

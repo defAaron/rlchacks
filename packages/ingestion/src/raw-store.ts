@@ -4,6 +4,7 @@ import {
   parseArtifact,
   RawPullRequestSchema,
   RawReviewCommentSchema,
+  redactSecrets,
   repoScopedPath,
   type RawPullRequest,
   type RawReviewComment,
@@ -119,17 +120,21 @@ export async function writeRawReviewComment(
     comment,
     "RawReviewComment",
   );
+  const redacted = {
+    ...validated,
+    body: redactSecrets(validated.body),
+  };
   const filePath = rawReviewCommentPath(
     dataDir,
     owner,
     name,
-    validated.id,
+    redacted.id,
   );
   const created = !(await pathExists(filePath));
   await mkdir(path.dirname(filePath), { recursive: true });
   await writeFile(
     filePath,
-    `${JSON.stringify(validated, null, 2)}\n`,
+    `${JSON.stringify(redacted, null, 2)}\n`,
     "utf8",
   );
   return { path: filePath, created };
@@ -149,6 +154,6 @@ export async function writeRawBlob(
   const filePath = rawBlobPath(dataDir, owner, name, sha);
   const created = !(await pathExists(filePath));
   await mkdir(path.dirname(filePath), { recursive: true });
-  await writeFile(filePath, text, "utf8");
+  await writeFile(filePath, redactSecrets(text), "utf8");
   return { path: filePath, created };
 }

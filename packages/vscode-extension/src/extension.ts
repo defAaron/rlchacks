@@ -4,6 +4,7 @@
 
 import * as vscode from "vscode";
 import { GraftApiClient, type GraftSuggestion } from "./apiClient";
+import { GraftSaveDiagnostics } from "./diagnostics";
 import { parseUnifiedDiffHunk, showPreviewDiff } from "./preview";
 
 let lastPreview: {
@@ -219,6 +220,19 @@ class GraftCodeActionProvider implements vscode.CodeActionProvider {
 }
 
 export function activate(context: vscode.ExtensionContext): void {
+  const diagnostics = new GraftSaveDiagnostics(
+    getClient,
+    () =>
+      vscode.workspace
+        .getConfiguration("graft")
+        .get<number>("diagnosticsMinSupport", 2),
+    () =>
+      vscode.workspace
+        .getConfiguration("graft")
+        .get<boolean>("diagnosticsOnSave", true),
+  );
+  diagnostics.attach(context);
+
   context.subscriptions.push(
     vscode.commands.registerCommand("graft.suggest", () => {
       void suggestForEditor();

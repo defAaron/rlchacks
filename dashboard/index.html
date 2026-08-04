@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Graft — Recipe Browser</title>
+  <style>
+    :root {
+      font-family: system-ui, -apple-system, sans-serif;
+      color: #1a1a1a;
+      background: #f6f7f9;
+    }
+    body { margin: 0; padding: 1.5rem; max-width: 1100px; margin-inline: auto; }
+    h1 { font-size: 1.4rem; margin: 0 0 0.25rem; }
+    .sub { color: #555; font-size: 0.9rem; margin-bottom: 1rem; }
+    .banner { background: #fff3cd; border: 1px solid #ffc107; padding: 0.75rem 1rem; border-radius: 6px; margin-bottom: 1rem; }
+    .empty { background: #fff; border: 1px dashed #ccc; padding: 2rem; text-align: center; border-radius: 8px; color: #666; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
+    input, select, button {
+      font: inherit; padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px;
+    }
+    button { cursor: pointer; background: #fff; }
+    button.primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+    button.danger { background: #dc2626; color: #fff; border-color: #dc2626; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    th, td { text-align: left; padding: 0.6rem 0.75rem; border-bottom: 1px solid #eee; }
+    th { background: #f0f2f5; font-size: 0.85rem; }
+    tr:hover { background: #f9fafb; cursor: pointer; }
+    tr.suppressed { opacity: 0.55; }
+    .detail { background: #fff; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    pre { background: #f3f4f6; padding: 0.75rem; overflow: auto; font-size: 0.82rem; border-radius: 4px; }
+    .badge { display: inline-block; font-size: 0.75rem; padding: 0.15rem 0.45rem; border-radius: 999px; background: #e5e7eb; }
+    .badge.high { background: #dcfce7; color: #166534; }
+    .badge.medium { background: #fef9c3; color: #854d0e; }
+    .badge.low { background: #fee2e2; color: #991b1b; }
+    .evidence { font-size: 0.85rem; margin-top: 0.75rem; }
+    .evidence a { color: #2563eb; }
+    #status { font-size: 0.85rem; color: #666; }
+  </style>
+</head>
+<body>
+  <h1>Graft Recipe Browser</h1>
+  <p class="sub">Read-only recipe list with suppress toggle (DEV-4). Repo scope from API server.</p>
+  <div id="banner" class="banner" style="display:none"></div>
+  <p id="status">Loading…</p>
+
+  <div class="toolbar">
+    <input id="filterPath" type="text" placeholder="Path prefix" />
+    <input id="filterLang" type="text" placeholder="Language" />
+    <input id="filterQ" type="text" placeholder="Search title/rationale" />
+    <button type="button" id="refreshBtn">Refresh</button>
+  </div>
+
+  <div id="listView"></div>
+  <div id="detailView" class="detail" style="display:none"></div>
+
+  <script>
+    const API = window.location.origin;
+    const TOKEN = new URLSearchParams(location.search).get('token') || '';
+
+    async function gql(query, variables) {
+      const headers = { 'content-type': 'application/json' };
+      if (TOKEN) headers.authorization = 'Bearer ' + TOKEN;
+      const res = await fetch(API + '/graphql', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ query, variables }),
+      });
+      const json = await res.json();
+      if (json.errors) throw new Error(json.errors[0]?.message || 'GraphQL error');
+      return json.data;
+    }
+
+    let selectedId = null;
+
+    async function loadFreshness() {
+      const data = await gql(`query { freshness { stale reason recipes episodes repo } }`);
+      const f = data.freshness;
+      document.getElementById('status').textContent =
+        `Repo: ${f.repo} · ${f.recipes} recipes · ${f.episodes} episodes`;
+      const banner = document.getElementById('banner');
+      if (f.stale) {
+        banner.style.display = 'block';
+        banner.textContent = f.reason || 'Data may be stale — run ingest / compile.';
+      } else {
+        banner.style.display = 'none';
+      }
+      if (f.recipes === 0) {
+        document.getElementById('listView').innerHTML =
+          '<div class="empty"><strong>No recipes yet.</strong><br/>Run <code>graft ingest → link → compile</code> or widen backfill / lower support threshold.</div>';
+        return false;
+      }
+      return true;
+    }
+
+    async function loadRecipes() {
+      const path = document.getElementById('filterPath').value.trim();
+      const language = document.getElementById('filterLang').value.trim();
+      const q = document.getElementById('filterQ').value.trim();
+      const vars = { limit: 100 };
+      if (path) vars.path = path;
+      if (language) vars.language = language;
+      if (q) vars.q = q;
+      const data = await gql(
+        `query($path: String, $language: String, $q: String, $limit: Int) {
+          recipes(path: $path, language: $language, q: $q, limit: $limit) {
+            id title support confidence pathPrefixes suppressed rationale
+          }
+        }`,
+        vars,
+      );
+      return data.recipes;
+    }
+
+    function renderList(recipes) {
+      if (!recipes.length) {
+        document.getElementById('listView').innerHTML =
+          '<div class="empty">No recipes match filters.</div>';
+        return;
+      }
+      const rows = recipes.map(r => `
+        <tr class="${r.suppressed ? 'suppressed' : ''}" data-id="${r.id}">
+          <td>${escapeHtml(r.title)}</td>
+          <td>${r.support}</td>
+          <td><span class="badge ${r.confidence}">${r.confidence}</span></td>
+          <td>${escapeHtml((r.pathPrefixes || []).join(', '))}</td>
+          <td>${r.suppressed ? 'yes' : 'no'}</td>
+        </tr>`).join('');
+      document.getElementById('listView').innerHTML = `
+        <table><thead><tr><th>Title</th><th>Support</th><th>Confidence</th><th>Paths</th><th>Suppressed</th></tr></thead>
+        <tbody>${rows}</tbody></table>`;
+      document.querySelectorAll('#listView tr[data-id]').forEach(tr => {
+        tr.addEventListener('click', () => showDetail(tr.dataset.id));
+      });
+    }
+
+    async function showDetail(id) {
+      selectedId = id;
+      const data = await gql(
+        `query($id: ID!) {
+          recipe(id: $id) {
+            id title rationale before after support confidence suppressed
+            evidence { prNumber commentUrl linkConfidence path commentBody }
+          }
+        }`,
+        { id },
+      );
+      const r = data.recipe;
+      if (!r) return;
+      const ev = (r.evidence || []).map(e =>
+        `<li>PR #${e.prNumber} · ${e.linkConfidence} · <a href="${e.commentUrl}" target="_blank" rel="noopener">comment</a> · ${escapeHtml(e.path)}</li>`
+      ).join('');
+      document.getElementById('detailView').style.display = 'block';
+      document.getElementById('detailView').innerHTML = `
+        <h2>${escapeHtml(r.title)}</h2>
+        <p>${escapeHtml(r.rationale)}</p>
+        <p>Support: ${r.support} · Confidence: <span class="badge ${r.confidence}">${r.confidence}</span></p>
+        <h3>Before</h3><pre>${escapeHtml(r.before)}</pre>
+        <h3>After</h3><pre>${escapeHtml(r.after)}</pre>
+        <div class="evidence"><strong>Evidence</strong><ul>${ev || '<li>None</li>'}</ul></div>
+        <button type="button" class="${r.suppressed ? 'primary' : 'danger'}" id="toggleSuppress">
+          ${r.suppressed ? 'Unsuppress recipe' : 'Suppress recipe'}
+        </button>`;
+      document.getElementById('toggleSuppress').addEventListener('click', async () => {
+        await gql(
+          `mutation($id: ID!, $suppressed: Boolean!) {
+            suppressRecipe(id: $id, suppressed: $suppressed) { id suppressed }
+          }`,
+          { id: r.id, suppressed: !r.suppressed },
+        );
+        await refresh();
+        await showDetail(id);
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    async function refresh() {
+      try {
+        const ok = await loadFreshness();
+        if (!ok) return;
+        const recipes = await loadRecipes();
+        renderList(recipes);
+      } catch (err) {
+        document.getElementById('status').textContent = 'Error: ' + err.message;
+        document.getElementById('listView').innerHTML =
+          '<div class="empty">Cannot reach Graft API. Start with <code>graft serve api</code>.</div>';
+      }
+    }
+
+    document.getElementById('refreshBtn').addEventListener('click', refresh);
+    ['filterPath','filterLang','filterQ'].forEach(id => {
+      document.getElementById(id).addEventListener('change', refresh);
+    });
+    refresh();
+  </script>
+</body>
+</html>
