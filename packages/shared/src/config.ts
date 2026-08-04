@@ -28,6 +28,10 @@ export type GraftEnv = {
   llmEnabled: boolean;
   /** True when `GRAFT_MIN_SUPPORT` was explicitly set in env. */
   minSupportFromEnv: boolean;
+  /** Optional bearer token for `graft serve api` (P1). */
+  apiToken: string | undefined;
+  apiHost: string;
+  apiPort: number;
 };
 
 export type ResolveGraftConfigOptions = {
@@ -111,6 +115,15 @@ export function loadGraftEnv(env: NodeJS.ProcessEnv = process.env): GraftEnv {
     minSupport,
     llmEnabled: parseBooleanEnv(env.GRAFT_LLM_ENABLED, DEFAULT_LLM_ENABLED),
     minSupportFromEnv,
+    apiToken:
+      env.API_TOKEN !== undefined && env.API_TOKEN.trim() !== ""
+        ? env.API_TOKEN.trim()
+        : undefined,
+    apiHost:
+      env.API_HOST !== undefined && env.API_HOST.trim() !== ""
+        ? env.API_HOST.trim()
+        : "127.0.0.1",
+    apiPort: parsePositiveIntEnv(env.API_PORT, 8787).value,
   };
 }
 

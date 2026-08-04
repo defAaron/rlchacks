@@ -30,12 +30,16 @@ import {
   listRecipes,
   loadRecipeIndex,
   suggestGrafts,
+  suppressRecipe,
   type ExplainRecipeResult,
   type FreshnessSummary,
   type ListRecipesResult,
   type SuggestGraftsResult,
+  type SuppressRecipeResult,
 } from "@graft/retrieval";
 import { runStdioServer } from "@graft/mcp-server";
+import { runApiServer } from "@graft/api-server";
+import { purgeRepository } from "@graft/pipeline";
 import {
   CLI_EXIT,
   GraftError,
@@ -163,8 +167,24 @@ export type RecipesExplainCliOptions = {
   recipeId: string;
 };
 
+export type RecipesSuppressCliOptions = {
+  repo: string;
+  recipeId: string;
+  unsuppress?: boolean;
+};
+
+export type PurgeCliOptions = {
+  repo: string;
+};
+
 export type ServeMcpCliOptions = {
   repo?: string;
+};
+
+export type ServeApiCliOptions = {
+  repo?: string;
+  host?: string;
+  port?: number;
 };
 
 export type MainOptions = {
@@ -184,7 +204,10 @@ function printUsage(error: (line: string) => void = console.error): void {
   graft suggest <owner/repo> [--diff file|-] [--path hint]
   graft recipes list <owner/repo> [--path prefix] [--language lang] [--q text]
   graft recipes explain <owner/repo> <recipe-id>
+  graft recipes suppress <owner/repo> <recipe-id> [--unsuppress]
+  graft purge <owner/repo>
   graft serve mcp [--repo owner/name]
+  graft serve api [--repo owner/name] [--host host] [--port n]
 
 Commands:
   config   Print resolved Graft config for a repo (no network)
@@ -192,8 +215,9 @@ Commands:
   link     Link raw comments into review episodes (LNK-1…5; LLM opt-in)
   compile  Cluster episodes into rewrite recipes (RCP-1…4)
   suggest  Match recipes to a unified diff and rank suggestions (RET-2…5)
-  recipes  List or explain compiled recipes
-  serve    Start MCP stdio server for coding agents (MCP-1…3)
+  recipes  List, explain, or suppress compiled recipes
+  purge    Delete all artifact data for a repo (SAF-5)
+  serve    Start MCP stdio server or HTTP GraphQL API (DEV-5)
 
 Exit codes (TRD §9):
   0  ok
@@ -525,6 +549,86 @@ export function parseRecipesExplainArgs(args: string[]): RecipesExplainCliOption
   return { repo, recipeId };
 }
 
+export function parseRecipesSuppressArgs(
+  args: string[],
+): RecipesSuppressCliOptions {
+  let repo: string | undefined;
+  let recipeId: string | undefined;
+  let unsuppress = false;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === undefined) {
+      continue;
+    }
+    if (arg === "--help" || arg === "-h") {
+      printUsage();
+      process.exit(0);
+    }
+    if (arg === "--unsuppress") {
+      unsuppress = true;
+      continue;
+    }
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+    if (repo === undefined) {
+      repo = arg;
+      continue;
+    }
+    if (recipeId === undefined) {
+      recipeId = arg;
+      continue;
+    }
+    throw new Error(`Unexpected argument: ${arg}`);
+  }
+
+  if (repo === undefined) {
+    throw new Error(
+      "Missing repo; usage: graft recipes suppress <owner/repo> <recipe-id>",
+    );
+  }
+  if (recipeId === undefined) {
+    throw new Error("Missing recipe id");
+  }
+
+  parseRepoSlug(repo);
+  const result: RecipesSuppressCliOptions = { repo, recipeId };
+  if (unsuppress) {
+    result.unsuppress = true;
+  }
+  return result;
+}
+
+export function parsePurgeArgs(args: string[]): PurgeCliOptions {
+  let repo: string | undefined;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === undefined) {
+      continue;
+    }
+    if (arg === "--help" || arg === "-h") {
+      printUsage();
+      process.exit(0);
+    }
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+    if (repo !== undefined) {
+      throw new Error(`Unexpected argument: ${arg}`);
+    }
+    repo = arg;
+  }
+
+  if (repo === undefined) {
+    throw new Error("Missing repo; usage: graft purge <owner/repo>");
+  }
+
+  parseRepoSlug(repo);
+  return { repo };
+}
+
 export function parseServeMcpArgs(args: string[]): ServeMcpCliOptions {
   let repo: string | undefined;
 
@@ -561,6 +665,76 @@ export function parseServeMcpArgs(args: string[]): ServeMcpCliOptions {
   const result: ServeMcpCliOptions = {};
   if (repo !== undefined) {
     result.repo = repo;
+  }
+  return result;
+}
+
+export function parseServeApiArgs(args: string[]): ServeApiCliOptions {
+  let repo: string | undefined;
+  let host: string | undefined;
+  let port: number | undefined;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === undefined) {
+      continue;
+    }
+    if (arg === "--help" || arg === "-h") {
+      printUsage();
+      process.exit(0);
+    }
+    if (arg === "--repo") {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith("-")) {
+        throw new Error("--repo requires owner/name");
+      }
+      repo = value;
+      i++;
+      continue;
+    }
+    if (arg === "--host") {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith("-")) {
+        throw new Error("--host requires a hostname");
+      }
+      host = value;
+      i++;
+      continue;
+    }
+    if (arg === "--port") {
+      const value = args[i + 1];
+      if (value === undefined || value.startsWith("-")) {
+        throw new Error("--port requires a positive integer");
+      }
+      const parsed = Number.parseInt(value, 10);
+      if (!Number.isInteger(parsed) || parsed < 1) {
+        throw new Error(`--port must be a positive integer; got ${value}`);
+      }
+      port = parsed;
+      i++;
+      continue;
+    }
+    if (arg.startsWith("-")) {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+    if (repo !== undefined) {
+      throw new Error(`Unexpected argument: ${arg}`);
+    }
+    repo = arg;
+  }
+
+  if (repo !== undefined) {
+    parseRepoSlug(repo);
+  }
+  const result: ServeApiCliOptions = {};
+  if (repo !== undefined) {
+    result.repo = repo;
+  }
+  if (host !== undefined) {
+    result.host = host;
+  }
+  if (port !== undefined) {
+    result.port = port;
   }
   return result;
 }
@@ -1001,6 +1175,56 @@ export async function runRecipesExplain(
   return result;
 }
 
+export async function runRecipesSuppress(
+  options: RecipesSuppressCliOptions & {
+    env?: NodeJS.ProcessEnv;
+    log?: (line: string) => void;
+  },
+): Promise<SuppressRecipeResult> {
+  const env = options.env ?? process.env;
+  const log = options.log ?? ((line: string) => console.log(line));
+
+  const resolved = await resolveGraftConfig({
+    repo: options.repo,
+    env,
+    init: false,
+  });
+  const { owner, name } = resolved.repo;
+  const dataDir = resolved.paths.dataDir;
+
+  const result = await suppressRecipe(
+    dataDir,
+    owner,
+    name,
+    options.recipeId,
+    options.unsuppress !== true,
+  );
+  log(JSON.stringify(result, null, 2));
+  return result;
+}
+
+export async function runPurge(
+  options: PurgeCliOptions & {
+    env?: NodeJS.ProcessEnv;
+    log?: (line: string) => void;
+  },
+): Promise<{ repo: string; removed: boolean; path: string }> {
+  const env = options.env ?? process.env;
+  const log = options.log ?? ((line: string) => console.log(line));
+
+  const resolved = await resolveGraftConfig({
+    repo: options.repo,
+    env,
+    init: false,
+  });
+  const { owner, name } = resolved.repo;
+  const dataDir = resolved.paths.dataDir;
+
+  const result = await purgeRepository(dataDir, owner, name);
+  log(JSON.stringify(result, null, 2));
+  return result;
+}
+
 async function runLinkCommand(
   args: string[],
   options: MainOptions,
@@ -1070,11 +1294,32 @@ async function runRecipesCommand(
     await runRecipesExplain(explainOpts);
     return;
   }
+  if (sub === "suppress") {
+    const opts = parseRecipesSuppressArgs(rest);
+    const suppressOpts = { ...opts };
+    if (options.env !== undefined) {
+      Object.assign(suppressOpts, { env: options.env });
+    }
+    await runRecipesSuppress(suppressOpts);
+    return;
+  }
   throw new Error(
     sub === undefined
-      ? "Missing recipes subcommand; use list or explain"
+      ? "Missing recipes subcommand; use list, explain, or suppress"
       : `Unknown recipes subcommand: ${sub}`,
   );
+}
+
+async function runPurgeCommand(
+  args: string[],
+  options: MainOptions,
+): Promise<void> {
+  const opts = parsePurgeArgs(args);
+  const purgeOpts = { ...opts };
+  if (options.env !== undefined) {
+    Object.assign(purgeOpts, { env: options.env });
+  }
+  await runPurge(purgeOpts);
 }
 
 async function runServeCommand(
@@ -1083,9 +1328,43 @@ async function runServeCommand(
 ): Promise<void> {
   const [sub, ...rest] = args;
   if (sub !== "mcp") {
+    if (sub === "api") {
+      const opts = parseServeApiArgs(rest);
+      const serveOpts: Parameters<typeof runApiServer>[0] = {};
+      if (options.env !== undefined) {
+        serveOpts.env = options.env;
+      }
+      if (opts.repo !== undefined) {
+        serveOpts.repo = opts.repo;
+      }
+      if (opts.host !== undefined) {
+        serveOpts.host = opts.host;
+      }
+      if (opts.port !== undefined) {
+        serveOpts.port = opts.port;
+      }
+      const started = await runApiServer(serveOpts);
+      console.log(
+        JSON.stringify(
+          {
+            status: "listening",
+            host: started.host,
+            port: started.port,
+            graphql: `http://${started.host}:${started.port}/graphql`,
+            health: `http://${started.host}:${started.port}/health`,
+          },
+          null,
+          2,
+        ),
+      );
+      await new Promise<void>(() => {
+        /* block until signal */
+      });
+      return;
+    }
     throw new Error(
       sub === undefined
-        ? "Missing serve subcommand; use mcp"
+        ? "Missing serve subcommand; use mcp or api"
         : `Unknown serve subcommand: ${sub}`,
     );
   }
@@ -1141,6 +1420,11 @@ export async function main(
 
     if (command === "recipes") {
       await runRecipesCommand(rest, options);
+      return CLI_EXIT.OK;
+    }
+
+    if (command === "purge") {
+      await runPurgeCommand(rest, options);
       return CLI_EXIT.OK;
     }
 

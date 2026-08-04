@@ -1,5 +1,5 @@
 {
-  "name": "@graft/cli",
+  "name": "@graft/api-server",
   "version": "0.0.1",
   "private": true,
   "type": "module",
@@ -11,9 +11,6 @@
       "import": "./dist/index.js"
     }
   },
-  "bin": {
-    "graft": "./dist/index.js"
-  },
   "files": [
     "dist"
   ],
@@ -22,13 +19,11 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@graft/api-server": "*",
     "@graft/compile": "*",
-    "@graft/ingestion": "*",
-    "@graft/linking": "*",
-    "@graft/mcp-server": "*",
-    "@graft/pipeline": "*",
     "@graft/retrieval": "*",
-    "@graft/shared": "*"
+    "@graft/shared": "*",
+    "graphql": "^16.10.0",
+    "graphql-http": "^1.22.4",
+    "@graphql-tools/schema": "^10.0.21"
   }
 }

@@ -13,7 +13,9 @@ import {
 } from "./context.js";
 import { toMcpToolError } from "./errors.js";
 import {
+  handleApplyPreview,
   handleExplainRecipe,
+  handleFreshness,
   handleListRecipes,
   handleSuggestGrafts,
   MAX_LIST_LIMIT,
@@ -173,6 +175,77 @@ export function createGraftMcpServer(
         const result = await handleExplainRecipe(c, {
           recipeId: args.recipeId,
         });
+        return toolJsonResult(result);
+      } catch (err) {
+        return toolErrorResult(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "freshness",
+    {
+      description:
+        "Report ingest/compile watermarks and whether suggestions may be stale (MCP-5).",
+      inputSchema: {},
+    },
+    async () => {
+      try {
+        const c = await ctx();
+        const result = await handleFreshness(c);
+        return toolJsonResult(result);
+      } catch (err) {
+        return toolErrorResult(err);
+      }
+    },
+  );
+
+  server.registerTool(
+    "apply_preview",
+    {
+      description:
+        "Preview unified diff for a recipe at a location. Does not write files — explicit apply only via editor (MCP-4).",
+      inputSchema: {
+        recipeId: z.string().optional().describe("Recipe id"),
+        path: z.string().optional().describe("Target file path"),
+        startLine: z.number().int().positive().optional(),
+        endLine: z.number().int().positive().optional(),
+        matchPath: z
+          .string()
+          .optional()
+          .describe("Path from suggest_grafts match"),
+        matchRange: z
+          .object({
+            startLine: z.number().int().positive(),
+            endLine: z.number().int().positive(),
+          })
+          .optional()
+          .nullable(),
+      },
+    },
+    async (args) => {
+      try {
+        const c = await ctx();
+        const input: Parameters<typeof handleApplyPreview>[1] = {};
+        if (args.recipeId !== undefined) {
+          input.recipeId = args.recipeId;
+        }
+        if (args.path !== undefined) {
+          input.path = args.path;
+        }
+        if (args.startLine !== undefined) {
+          input.startLine = args.startLine;
+        }
+        if (args.endLine !== undefined) {
+          input.endLine = args.endLine;
+        }
+        if (args.matchPath !== undefined) {
+          input.matchPath = args.matchPath;
+        }
+        if (args.matchRange !== undefined) {
+          input.matchRange = args.matchRange;
+        }
+        const result = await handleApplyPreview(c, input);
         return toolJsonResult(result);
       } catch (err) {
         return toolErrorResult(err);

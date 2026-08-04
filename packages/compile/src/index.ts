@@ -49,6 +49,9 @@ export {
   compileMetaPath,
   suppressionsPath,
   readSuppressions,
+  readSuppressionsFile,
+  writeSuppressions,
+  setRecipeSuppressed,
   writeRewriteRecipe,
   writeRecipeIndex,
   writeCompileMeta,
@@ -60,6 +63,7 @@ export {
   type RecipeIndexEntry,
   type RecipeIndex,
   type CompileMeta,
+  type SuppressionsFile,
 } from "./recipe-store.js";
 
 export {

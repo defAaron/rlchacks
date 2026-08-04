@@ -1,0 +1,63 @@
+{
+  "name": "graft-vscode",
+  "displayName": "Graft",
+  "description": "Preview and apply historical code-review grafts in VS Code / Cursor",
+  "version": "0.2.0",
+  "publisher": "graft",
+  "private": true,
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": ["Other"],
+  "activationEvents": [
+    "onCommand:graft.suggest",
+    "onCommand:graft.previewSuggestion",
+    "onCommand:graft.applyPreview"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "graft.suggest",
+        "title": "Graft: Suggest for current diff/selection"
+      },
+      {
+        "command": "graft.previewSuggestion",
+        "title": "Graft: Preview historical accept"
+      },
+      {
+        "command": "graft.applyPreview",
+        "title": "Graft: Apply previewed graft"
+      }
+    ],
+    "configuration": {
+      "title": "Graft",
+      "properties": {
+        "graft.apiBaseUrl": {
+          "type": "string",
+          "default": "http://127.0.0.1:8787",
+          "description": "Graft GraphQL API base URL (graft serve api)"
+        },
+        "graft.apiToken": {
+          "type": "string",
+          "default": "",
+          "description": "Optional bearer token (API_TOKEN)"
+        },
+        "graft.repo": {
+          "type": "string",
+          "default": "",
+          "description": "Repo slug owner/name (defaults to workspace hint)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.7.3"
+  }
+}

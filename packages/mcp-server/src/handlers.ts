@@ -5,6 +5,8 @@
 import { loadEpisodesByIds } from "@graft/compile";
 import {
   DEFAULT_LIST_LIMIT,
+  applyPreview,
+  applyPreviewFromSuggestion,
   explainRecipe,
   getFreshnessSummary,
   listRecipes,
@@ -77,6 +79,29 @@ export type ExplainEpisode = {
 export type ExplainRecipeOutput = {
   recipe: RewriteRecipe;
   episodes: ExplainEpisode[];
+  freshness: McpFreshness;
+};
+
+export type FreshnessOutput = McpFreshness;
+
+export type ApplyPreviewInput = {
+  recipeId?: string;
+  path?: string;
+  startLine?: number;
+  endLine?: number;
+  /** Rank from suggest_grafts (0-based). Requires prior suggest context fields. */
+  suggestionRank?: number;
+  matchPath?: string;
+  matchRange?: { startLine: number; endLine: number } | null;
+};
+
+export type ApplyPreviewOutput = {
+  recipeId: string;
+  title: string;
+  rationale: string;
+  matchPath: string;
+  unifiedDiff: string;
+  warnings: string[];
   freshness: McpFreshness;
 };
 
@@ -249,4 +274,84 @@ export async function handleExplainRecipe(
     episodes,
     freshness: toMcpFreshness(freshnessSummary),
   };
+}
+
+export async function handleFreshness(
+  ctx: McpServerContext,
+): Promise<FreshnessOutput> {
+  const freshnessSummary = await getFreshnessSummary(
+    ctx.dataDir,
+    ctx.owner,
+    ctx.name,
+  );
+  return toMcpFreshness(freshnessSummary);
+}
+
+export async function handleApplyPreview(
+  ctx: McpServerContext,
+  input: ApplyPreviewInput,
+): Promise<ApplyPreviewOutput> {
+  const freshnessSummary = await getFreshnessSummary(
+    ctx.dataDir,
+    ctx.owner,
+    ctx.name,
+  );
+
+  if (input.recipeId !== undefined && input.path !== undefined) {
+    const previewInput: Parameters<typeof applyPreview>[3] = {
+      recipeId: input.recipeId,
+      path: input.path,
+    };
+    if (input.startLine !== undefined) {
+      previewInput.startLine = input.startLine;
+    }
+    if (input.endLine !== undefined) {
+      previewInput.endLine = input.endLine;
+    }
+    const preview = await applyPreview(
+      ctx.dataDir,
+      ctx.owner,
+      ctx.name,
+      previewInput,
+    );
+    return {
+      recipeId: preview.recipeId,
+      title: preview.title,
+      rationale: preview.rationale,
+      matchPath: preview.matchPath,
+      unifiedDiff: preview.patch,
+      warnings: preview.warnings,
+      freshness: toMcpFreshness(freshnessSummary),
+    };
+  }
+
+  if (
+    input.recipeId !== undefined &&
+    input.matchPath !== undefined
+  ) {
+    const preview = await applyPreviewFromSuggestion(
+      ctx.dataDir,
+      ctx.owner,
+      ctx.name,
+      {
+        recipeId: input.recipeId,
+        matchPath: input.matchPath,
+        matchRange: input.matchRange ?? null,
+      },
+    );
+    return {
+      recipeId: preview.recipeId,
+      title: preview.title,
+      rationale: preview.rationale,
+      matchPath: preview.matchPath,
+      unifiedDiff: preview.patch,
+      warnings: preview.warnings,
+      freshness: toMcpFreshness(freshnessSummary),
+    };
+  }
+
+  throw new GraftError(
+    GraftErrorCodes.GRAFT_INVALID_DIFF,
+    "Provide recipeId + path (+ optional startLine/endLine) or recipeId + matchPath from suggest_grafts.",
+  );
 }

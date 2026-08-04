@@ -87,6 +87,22 @@ Full audit trail for one recipe.
 
 Each episode includes `rejected`, `accepted`, `linkConfidence`, and `commentUrl`.
 
+### `freshness`
+
+Standalone freshness query (MCP-5).
+
+**Input:** `{}`
+
+**Output:** `{ ingestAt, compileAt, episodes, recipes, stale, reason }`
+
+### `apply_preview`
+
+Preview unified diff for a recipe at a location. **Does not write files.**
+
+**Input:** `{ recipeId, path?, startLine?, endLine?, matchPath?, matchRange? }`
+
+**Output:** `{ recipeId, title, rationale, matchPath, unifiedDiff, warnings[], freshness }`
+
 ## Error codes
 
 | Code | Meaning |
@@ -110,9 +126,4 @@ Each episode includes `rejected`, `accepted`, `linkConfidence`, and `commentUrl`
 - **Evidence required:** Suggestions without evidence pointers are refused (RET-5).
 - **LLM off by default:** Set `GRAFT_LLM_ENABLED=true` only when you explicitly want LLM-assisted linking.
 
-## P1 tools (not in MVP)
-
-- `apply_preview` — unified diff preview for a suggestion (Phase 6–7)
-- `freshness` — standalone freshness query (Phase 6)
-
-Freshness summary is already included in `list_recipes` and `suggest_grafts` responses.
+Freshness summary is included in all tool responses that return data; use `freshness` for a standalone check.

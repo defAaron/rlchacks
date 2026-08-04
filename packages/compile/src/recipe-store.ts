@@ -90,16 +90,30 @@ export function suppressionsPath(
   return repoScopedPath(dataDir, owner, name, "suppressions.json");
 }
 
+export type SuppressionsFile = {
+  repo: string;
+  updatedAt: string;
+  suppressed: string[];
+};
+
 export async function readSuppressions(
   dataDir: string,
   owner: string,
   name: string,
 ): Promise<Set<string>> {
+  const file = await readSuppressionsFile(dataDir, owner, name);
+  return new Set(file?.suppressed ?? []);
+}
+
+export async function readSuppressionsFile(
+  dataDir: string,
+  owner: string,
+  name: string,
+): Promise<SuppressionsFile | null> {
   const filePath = suppressionsPath(dataDir, owner, name);
   try {
     const raw = await readFile(filePath, "utf8");
-    const json = JSON.parse(raw) as { suppressed?: string[] };
-    return new Set(json.suppressed ?? []);
+    return JSON.parse(raw) as SuppressionsFile;
   } catch (err) {
     if (
       err !== null &&
@@ -107,10 +121,55 @@ export async function readSuppressions(
       "code" in err &&
       (err as { code: unknown }).code === "ENOENT"
     ) {
-      return new Set();
+      return null;
     }
     throw err;
   }
+}
+
+/** Persist suppressions list (RCP-7). Creates parent dirs as needed. */
+export async function writeSuppressions(
+  dataDir: string,
+  owner: string,
+  name: string,
+  suppressed: readonly string[],
+  updatedAt: string,
+): Promise<string> {
+  const repo = `${owner}/${name}`;
+  const filePath = suppressionsPath(dataDir, owner, name);
+  const body: SuppressionsFile = {
+    repo,
+    updatedAt,
+    suppressed: [...new Set(suppressed)].sort(),
+  };
+  await mkdir(recipesDir(dataDir, owner, name), { recursive: true });
+  await writeFile(filePath, `${JSON.stringify(body, null, 2)}\n`, "utf8");
+  return filePath;
+}
+
+/** Mark a recipe suppressed or unsuppressed; returns updated id set. */
+export async function setRecipeSuppressed(
+  dataDir: string,
+  owner: string,
+  name: string,
+  recipeId: string,
+  suppressed: boolean,
+  updatedAt: string,
+): Promise<Set<string>> {
+  const existing = await readSuppressions(dataDir, owner, name);
+  if (suppressed) {
+    existing.add(recipeId);
+  } else {
+    existing.delete(recipeId);
+  }
+  await writeSuppressions(
+    dataDir,
+    owner,
+    name,
+    [...existing],
+    updatedAt,
+  );
+  return existing;
 }
 
 export async function writeRewriteRecipe(

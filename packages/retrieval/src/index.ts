@@ -48,3 +48,15 @@ export {
   formatStaleBanner,
   type FreshnessSummary,
 } from "./freshness.js";
+
+export {
+  suppressRecipe,
+  type SuppressRecipeResult,
+} from "./suppress.js";
+
+export {
+  applyPreview,
+  applyPreviewFromSuggestion,
+  type ApplyPreviewInput,
+  type ApplyPreviewResult,
+} from "./apply-preview.js";

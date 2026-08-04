@@ -9,6 +9,8 @@ import { describe, expect, it } from "vitest";
 import { GraftErrorCodes, graftNoDataError } from "@graft/shared";
 import {
   createGraftMcpServer,
+  handleApplyPreview,
+  handleFreshness,
   handleListRecipes,
   handleSuggestGrafts,
   resolveMcpContext,
@@ -98,6 +100,34 @@ describe("MCP handlers — offline", () => {
     await expect(
       handleSuggestGrafts(ctx, [], {}),
     ).rejects.toMatchObject({ code: GraftErrorCodes.GRAFT_INVALID_DIFF });
+  });
+
+  it("freshness reports non-stale after compile", async () => {
+    const { ctx } = await seedCompiledData();
+    const fresh = await handleFreshness(ctx);
+    expect(fresh.stale).toBe(false);
+    expect(fresh.recipes).toBeGreaterThan(0);
+  });
+
+  it("apply_preview matches suggest patch shape", async () => {
+    const { dataDir, ctx } = await seedCompiledData();
+    const { loadRecipeIndex } = await import("@graft/retrieval");
+    const loaded = await loadRecipeIndex({
+      dataDir,
+      owner: ctx.owner,
+      name: ctx.name,
+    });
+    const diff = await readFile(rejectedDiff, "utf8");
+    const suggested = await handleSuggestGrafts(ctx, loaded.recipes, { diff });
+    const top = suggested.suggestions[0]!;
+
+    const preview = await handleApplyPreview(ctx, {
+      recipeId: top.recipeId,
+      matchPath: top.matchPath,
+      matchRange: top.matchRange,
+    });
+    expect(preview.unifiedDiff).toBeTruthy();
+    expect(preview.warnings).toBeDefined();
   });
 });
 

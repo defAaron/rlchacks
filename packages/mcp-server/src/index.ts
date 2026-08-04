@@ -12,13 +12,18 @@ export { toMcpToolError, type McpToolErrorBody } from "./errors.js";
 export { toMcpFreshness, type McpFreshness } from "./freshness.js";
 
 export {
+  handleApplyPreview,
   handleExplainRecipe,
+  handleFreshness,
   handleListRecipes,
   handleSuggestGrafts,
   MAX_LIST_LIMIT,
+  type ApplyPreviewInput,
+  type ApplyPreviewOutput,
   type ExplainEpisode,
   type ExplainRecipeInput,
   type ExplainRecipeOutput,
+  type FreshnessOutput,
   type ListRecipesInput,
   type ListRecipesOutput,
   type SuggestGraftsInput,

@@ -6,3 +6,8 @@ export {
   readCursors,
   writeCursors,
 } from "./cursors.js";
+
+export {
+  purgeRepository,
+  type PurgeRepositoryResult,
+} from "./purge.js";
