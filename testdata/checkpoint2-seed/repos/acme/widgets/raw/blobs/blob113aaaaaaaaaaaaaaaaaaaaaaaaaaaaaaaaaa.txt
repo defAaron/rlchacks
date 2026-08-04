@@ -1,0 +1,4 @@
+export function flags() {
+  const enabled = true;
+  return { enabled };
+}

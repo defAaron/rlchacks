@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureComment1",
+  "prNumber": 101,
+  "path": "src/retry.ts",
+  "body": "Prefer early return: throw on the last attempt instead of nested try/catch.",
+  "author": "reviewer1",
+  "createdAt": "2024-06-14T10:00:00Z",
+  "diffHunk": "@@ -4,7 +4,8 @@ export async function retry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {\n     try {\n       return await fn();\n     } catch (err) {\n-      lastError = err;\n+      if (i === attempts - 1) throw err;\n+      lastError = err;\n     }\n   }\n   throw lastError;",
+  "line": 7,
+  "originalLine": 7,
+  "side": "RIGHT",
+  "commitId": "dddddddddddddddddddddddddddddddddddddddd",
+  "htmlUrl": "https://github.com/acme/widgets/pull/101#discussion_r9001"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "PR_kwDOFixture119",
+  "number": 119,
+  "mergedAt": "2024-06-16T19:00:00Z",
+  "mergeCommitSha": "m119aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "baseRef": "main",
+  "headRef": "feat/pr-119",
+  "title": "Tighten types",
+  "url": "https://github.com/acme/widgets/pull/119"
+}

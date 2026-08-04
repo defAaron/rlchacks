@@ -1,0 +1,31 @@
+{
+  "id": "ep_1378204a83f61f64",
+  "repo": "acme/widgets",
+  "prNumber": 110,
+  "commentId": "PRRC_kwDOFixtureComment110",
+  "path": "src/api/client.ts",
+  "language": "typescript",
+  "commentBody": "Please use withRetry instead of setTimeout.\n```suggestion\n  await withRetry(() => fetchThing());\n```",
+  "rejected": {
+    "path": "src/api/client.ts",
+    "startLine": 2,
+    "endLine": 2,
+    "sha": "blob110bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "text": "  setTimeout(() => {}, 1000);",
+    "normalized": "setTimeout(()=>{},N);"
+  },
+  "accepted": {
+    "path": "src/api/client.ts",
+    "startLine": 2,
+    "endLine": 2,
+    "sha": "blob110aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "text": "  await withRetry(() => fetchThing());",
+    "normalized": "awaitwithRetry(()=>fetchThing());"
+  },
+  "linkConfidence": "high",
+  "linkReason": "rejected_from_line_blob+suggestion_block_applied",
+  "actionable": true,
+  "discardReason": null,
+  "reviewer": "alice",
+  "mergedAt": "2024-06-16T10:00:00Z"
+}

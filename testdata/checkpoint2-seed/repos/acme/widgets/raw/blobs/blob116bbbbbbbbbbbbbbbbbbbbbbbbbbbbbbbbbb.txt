@@ -1,0 +1,5 @@
+export async function loadAll(ids) {
+  const a = await fetchOne(ids[0]);
+  const b = await fetchOne(ids[1]);
+  return [a, b];
+}

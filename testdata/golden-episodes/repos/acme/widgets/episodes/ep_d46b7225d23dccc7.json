@@ -1,0 +1,31 @@
+{
+  "id": "ep_d46b7225d23dccc7",
+  "repo": "acme/widgets",
+  "prNumber": 111,
+  "commentId": "PRRC_kwDOFixtureComment111",
+  "path": "src/run.ts",
+  "language": "typescript",
+  "commentBody": "Prefer early return over nested try/catch here.",
+  "rejected": {
+    "path": "src/run.ts",
+    "startLine": 3,
+    "endLine": 3,
+    "sha": "blob111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "text": "    try { return await fn(); } catch (e) { throw e; }",
+    "normalized": "try{returnawaitfn();}catch(e){throwe;}"
+  },
+  "accepted": {
+    "path": "src/run.ts",
+    "startLine": 3,
+    "endLine": 3,
+    "sha": "blob111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "text": "  return await fn();",
+    "normalized": "returnawaitfn();"
+  },
+  "linkConfidence": "high",
+  "linkReason": "rejected_from_line_blob+exact_span_replacement",
+  "actionable": true,
+  "discardReason": null,
+  "reviewer": "bob",
+  "mergedAt": "2024-06-16T11:00:00Z"
+}

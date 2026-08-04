@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureComment120",
+  "prNumber": 120,
+  "path": "src/form.ts",
+  "body": "Extract a validateEmail helper instead of inlining the regex check.",
+  "author": "kyle",
+  "createdAt": "2024-06-16T19:00:00Z",
+  "diffHunk": "@@ -1,5 +1,5 @@\n export function submit(email) {\n   // form submit\n-  if (!/.+@.+/.test(email)) throw new Error(\"bad email\");\n+  validateEmail(email);\n   return post(email);\n }",
+  "line": 3,
+  "originalLine": 3,
+  "side": "RIGHT",
+  "commitId": "c120bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "htmlUrl": "https://github.com/acme/widgets/pull/120#discussion_r120"
+}

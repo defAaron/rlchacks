@@ -1,0 +1,31 @@
+{
+  "id": "ep_901f109dfef8db03",
+  "repo": "acme/widgets",
+  "prNumber": 115,
+  "commentId": "PRRC_kwDOFixtureComment115",
+  "path": "src/parse.ts",
+  "language": "typescript",
+  "commentBody": "Add a null guard and return early before parsing.",
+  "rejected": {
+    "path": "src/parse.ts",
+    "startLine": 2,
+    "endLine": 2,
+    "sha": "blob115bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "text": "  const data = JSON.parse(input);",
+    "normalized": "constdata=JSON.parse(input);"
+  },
+  "accepted": {
+    "path": "src/parse.ts",
+    "startLine": 2,
+    "endLine": 2,
+    "sha": "blob115aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "text": "  if (input == null) return null;",
+    "normalized": "if(input==null)returnnull;"
+  },
+  "linkConfidence": "medium",
+  "linkReason": "rejected_from_line_blob+overlap_lexical",
+  "actionable": true,
+  "discardReason": null,
+  "reviewer": "frank",
+  "mergedAt": "2024-06-16T15:00:00Z"
+}

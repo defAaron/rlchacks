@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureComment115",
+  "prNumber": 115,
+  "path": "src/parse.ts",
+  "body": "Add a null guard and return early before parsing.",
+  "author": "frank",
+  "createdAt": "2024-06-16T14:00:00Z",
+  "diffHunk": "@@ -1,4 +1,5 @@\n export function parsePayload(input) {\n+  if (input == null) return null;\n   const data = JSON.parse(input);\n   return data.value;\n }",
+  "line": 2,
+  "originalLine": 2,
+  "side": "RIGHT",
+  "commitId": "c115bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "htmlUrl": "https://github.com/acme/widgets/pull/115#discussion_r115"
+}

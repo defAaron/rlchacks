@@ -1,0 +1,114 @@
+{
+  "repo": "acme/widgets",
+  "updatedAt": "2026-08-04T00:15:16.097Z",
+  "episodes": [
+    {
+      "id": "ep_b4075567e9aabba7",
+      "prNumber": 101,
+      "commentId": "PRRC_kwDOFixtureComment101",
+      "path": "src/retry.ts",
+      "linkConfidence": "medium",
+      "linkReason": "rejected_from_line_blob+overlap_lexical",
+      "actionable": true
+    },
+    {
+      "id": "ep_1378204a83f61f64",
+      "prNumber": 110,
+      "commentId": "PRRC_kwDOFixtureComment110",
+      "path": "src/api/client.ts",
+      "linkConfidence": "high",
+      "linkReason": "rejected_from_line_blob+suggestion_block_applied",
+      "actionable": true
+    },
+    {
+      "id": "ep_d46b7225d23dccc7",
+      "prNumber": 111,
+      "commentId": "PRRC_kwDOFixtureComment111",
+      "path": "src/run.ts",
+      "linkConfidence": "high",
+      "linkReason": "rejected_from_line_blob+exact_span_replacement",
+      "actionable": true
+    },
+    {
+      "id": "ep_0145e50dae62af02",
+      "prNumber": 112,
+      "commentId": "PRRC_kwDOFixtureComment112",
+      "path": "src/cache.ts",
+      "linkConfidence": "medium",
+      "linkReason": "rejected_from_line_blob+overlap_lexical",
+      "actionable": true
+    },
+    {
+      "id": "ep_512eba408688a615",
+      "prNumber": 113,
+      "commentId": "PRRC_kwDOFixtureComment113",
+      "path": "src/config.ts",
+      "linkConfidence": "high",
+      "linkReason": "rejected_from_line_blob+exact_span_replacement",
+      "actionable": true
+    },
+    {
+      "id": "ep_d9bc2cd7afef58fd",
+      "prNumber": 114,
+      "commentId": "PRRC_kwDOFixtureComment114",
+      "path": "src/user.ts",
+      "linkConfidence": "high",
+      "linkReason": "rejected_from_line_blob+exact_span_replacement",
+      "actionable": true
+    },
+    {
+      "id": "ep_901f109dfef8db03",
+      "prNumber": 115,
+      "commentId": "PRRC_kwDOFixtureComment115",
+      "path": "src/parse.ts",
+      "linkConfidence": "medium",
+      "linkReason": "rejected_from_line_blob+overlap_lexical",
+      "actionable": true
+    },
+    {
+      "id": "ep_b4b3a80fedc44087",
+      "prNumber": 116,
+      "commentId": "PRRC_kwDOFixtureComment116",
+      "path": "src/batch.ts",
+      "linkConfidence": "medium",
+      "linkReason": "rejected_from_line_blob+overlap_lexical",
+      "actionable": true
+    },
+    {
+      "id": "ep_383aeca07cd72b2c",
+      "prNumber": 117,
+      "commentId": "PRRC_kwDOFixtureComment117",
+      "path": "src/index-map.ts",
+      "linkConfidence": "medium",
+      "linkReason": "rejected_from_line_blob+overlap_lexical",
+      "actionable": true
+    },
+    {
+      "id": "ep_deb31395c3a692b6",
+      "prNumber": 118,
+      "commentId": "PRRC_kwDOFixtureComment118",
+      "path": "src/status.ts",
+      "linkConfidence": "high",
+      "linkReason": "rejected_from_line_blob+exact_span_replacement",
+      "actionable": true
+    },
+    {
+      "id": "ep_3972ce992bb85cc7",
+      "prNumber": 119,
+      "commentId": "PRRC_kwDOFixtureComment119",
+      "path": "src/types.ts",
+      "linkConfidence": "high",
+      "linkReason": "rejected_from_line_blob+exact_span_replacement",
+      "actionable": true
+    },
+    {
+      "id": "ep_e57383b0e0dcd6bf",
+      "prNumber": 120,
+      "commentId": "PRRC_kwDOFixtureComment120",
+      "path": "src/form.ts",
+      "linkConfidence": "high",
+      "linkReason": "rejected_from_line_blob+exact_span_replacement",
+      "actionable": true
+    }
+  ]
+}

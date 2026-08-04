@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureComment113",
+  "prNumber": 113,
+  "path": "src/config.ts",
+  "body": "Use const for enabled — it is never reassigned.",
+  "author": "dana",
+  "createdAt": "2024-06-16T12:00:00Z",
+  "diffHunk": "@@ -1,4 +1,4 @@\n export function flags() {\n-  let enabled = true;\n+  const enabled = true;\n   return { enabled };\n }",
+  "line": 2,
+  "originalLine": 2,
+  "side": "RIGHT",
+  "commitId": "c113bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "htmlUrl": "https://github.com/acme/widgets/pull/113#discussion_r113"
+}

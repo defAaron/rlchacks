@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureComment117",
+  "prNumber": 117,
+  "path": "src/index-map.ts",
+  "body": "Prefer a Map for id lookup instead of a plain object.",
+  "author": "hank",
+  "createdAt": "2024-06-16T16:00:00Z",
+  "diffHunk": "@@ -1,5 +1,5 @@\n export function indexById(items) {\n-  const out = {};\n-  for (const item of items) out[item.id] = item;\n+  const out = new Map();\n+  for (const item of items) out.set(item.id, item);\n   return out;\n }",
+  "line": 3,
+  "originalLine": 3,
+  "side": "RIGHT",
+  "commitId": "c117bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "htmlUrl": "https://github.com/acme/widgets/pull/117#discussion_r117"
+}

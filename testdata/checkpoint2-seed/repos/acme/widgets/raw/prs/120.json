@@ -1,0 +1,10 @@
+{
+  "id": "PR_kwDOFixture120",
+  "number": 120,
+  "mergedAt": "2024-06-16T20:00:00Z",
+  "mergeCommitSha": "m120aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "baseRef": "main",
+  "headRef": "feat/pr-120",
+  "title": "Extract validate helper",
+  "url": "https://github.com/acme/widgets/pull/120"
+}

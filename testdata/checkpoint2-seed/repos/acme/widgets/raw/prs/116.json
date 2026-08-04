@@ -1,0 +1,10 @@
+{
+  "id": "PR_kwDOFixture116",
+  "number": 116,
+  "mergedAt": "2024-06-16T16:00:00Z",
+  "mergeCommitSha": "m116aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "baseRef": "main",
+  "headRef": "feat/pr-116",
+  "title": "Parallel fetches",
+  "url": "https://github.com/acme/widgets/pull/116"
+}

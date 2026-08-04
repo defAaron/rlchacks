@@ -1,0 +1,31 @@
+{
+  "id": "ep_e57383b0e0dcd6bf",
+  "repo": "acme/widgets",
+  "prNumber": 120,
+  "commentId": "PRRC_kwDOFixtureComment120",
+  "path": "src/form.ts",
+  "language": "typescript",
+  "commentBody": "Extract a validateEmail helper instead of inlining the regex check.",
+  "rejected": {
+    "path": "src/form.ts",
+    "startLine": 3,
+    "endLine": 3,
+    "sha": "blob120bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "text": "  if (!/.+@.+/.test(email)) throw new Error(\"bad email\");",
+    "normalized": "if(!/.+@.+/.test(email))thrownewError(S);"
+  },
+  "accepted": {
+    "path": "src/form.ts",
+    "startLine": 3,
+    "endLine": 3,
+    "sha": "blob120aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "text": "  validateEmail(email);",
+    "normalized": "validateEmail(email);"
+  },
+  "linkConfidence": "high",
+  "linkReason": "rejected_from_line_blob+exact_span_replacement",
+  "actionable": true,
+  "discardReason": null,
+  "reviewer": "kyle",
+  "mergedAt": "2024-06-16T20:00:00Z"
+}

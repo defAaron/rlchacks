@@ -1,0 +1,76 @@
+[
+  {
+    "id": "line-blob-success",
+    "description": "RIGHT line + blob maps to a single rejected line",
+    "comment": {
+      "path": "src/api/client.ts",
+      "line": 2,
+      "originalLine": 2,
+      "side": "RIGHT",
+      "diffHunk": "@@ -1,3 +1,4 @@\n export function fetchThing() {\n+  setTimeout(() => {}, 1000);\n   return true;\n }",
+      "commitId": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+    },
+    "blobText": "export function fetchThing() {\n  setTimeout(() => {}, 1000);\n  return true;\n}\n",
+    "blobSha": "blobshaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "expected": {
+      "source": "line_blob",
+      "linkConfidence": null,
+      "linkReason": "rejected_from_line_blob",
+      "rejected": {
+        "path": "src/api/client.ts",
+        "startLine": 2,
+        "endLine": 2,
+        "sha": "blobshaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "text": "  setTimeout(() => {}, 1000);",
+        "normalized": "setTimeout(()=>{},N);"
+      }
+    }
+  },
+  {
+    "id": "diff-hunk-fallback",
+    "description": "Missing blob — fall back to right-side line from diffHunk",
+    "comment": {
+      "path": "src/retry.ts",
+      "line": 12,
+      "originalLine": 12,
+      "side": "RIGHT",
+      "diffHunk": "@@ -10,6 +10,8 @@ export async function retry<T>(fn: () => Promise<T>, attempts = 3): Promise<T> {\n   let lastError: unknown;\n   for (let i = 0; i < attempts; i++) {\n     try {\n       return await fn();\n     } catch (err) {\n       lastError = err;\n     }\n   }",
+      "commitId": "dddddddddddddddddddddddddddddddddddddddd"
+    },
+    "blobText": null,
+    "blobSha": null,
+    "expected": {
+      "source": "diff_hunk",
+      "linkConfidence": null,
+      "linkReason": "rejected_from_diff_hunk",
+      "rejected": {
+        "path": "src/retry.ts",
+        "startLine": 12,
+        "endLine": 12,
+        "sha": "dddddddddddddddddddddddddddddddddddddddd",
+        "text": "    try {",
+        "normalized": "try{"
+      }
+    }
+  },
+  {
+    "id": "none-neither-works",
+    "description": "No line/blob and no usable diffHunk → linkConfidence none",
+    "comment": {
+      "path": "src/mystery.ts",
+      "line": null,
+      "originalLine": null,
+      "side": null,
+      "diffHunk": null,
+      "commitId": null
+    },
+    "blobText": null,
+    "blobSha": null,
+    "expected": {
+      "source": "none",
+      "linkConfidence": "none",
+      "linkReason": "rejected_span_none",
+      "rejected": null
+    }
+  }
+]

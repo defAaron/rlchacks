@@ -1,0 +1,8 @@
+export function label(status) {
+  switch (status) {
+    case "ok":
+      return "OK";
+    default:
+      throw new Error(`unknown status: ${status}`);
+  }
+}

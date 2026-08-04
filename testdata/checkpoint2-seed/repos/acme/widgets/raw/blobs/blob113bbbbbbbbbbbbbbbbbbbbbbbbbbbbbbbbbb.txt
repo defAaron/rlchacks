@@ -1,0 +1,4 @@
+export function flags() {
+  let enabled = true;
+  return { enabled };
+}

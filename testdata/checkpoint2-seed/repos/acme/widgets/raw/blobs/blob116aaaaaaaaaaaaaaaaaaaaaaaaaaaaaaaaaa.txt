@@ -1,0 +1,4 @@
+export async function loadAll(ids) {
+  const [a, b] = await Promise.all([fetchOne(ids[0]), fetchOne(ids[1])]);
+  return [a, b];
+}

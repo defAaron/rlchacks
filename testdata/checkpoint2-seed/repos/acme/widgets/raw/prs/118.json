@@ -1,0 +1,10 @@
+{
+  "id": "PR_kwDOFixture118",
+  "number": 118,
+  "mergedAt": "2024-06-16T18:00:00Z",
+  "mergeCommitSha": "m118aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "baseRef": "main",
+  "headRef": "feat/pr-118",
+  "title": "Status switch",
+  "url": "https://github.com/acme/widgets/pull/118"
+}

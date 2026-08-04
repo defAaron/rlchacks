@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1001,
+    "node_id": "PR_kwDOFixtureA",
+    "number": 101,
+    "state": "closed",
+    "title": "Extract retry helper",
+    "html_url": "https://github.com/acme/widgets/pull/101",
+    "merged_at": "2024-06-15T12:00:00Z",
+    "merge_commit_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "draft": false,
+    "base": { "ref": "main" },
+    "head": { "ref": "feat/retry-helper" },
+    "updated_at": "2024-06-15T12:00:00Z"
+  },
+  {
+    "id": 1002,
+    "node_id": "PR_kwDOFixtureB",
+    "number": 102,
+    "state": "closed",
+    "title": "Closed without merge",
+    "html_url": "https://github.com/acme/widgets/pull/102",
+    "merged_at": null,
+    "merge_commit_sha": null,
+    "draft": false,
+    "base": { "ref": "main" },
+    "head": { "ref": "wip/abandoned" },
+    "updated_at": "2024-06-14T18:00:00Z"
+  },
+  {
+    "id": 1003,
+    "node_id": "PR_kwDOFixtureC",
+    "number": 103,
+    "state": "closed",
+    "title": "Normalize timeouts",
+    "html_url": "https://github.com/acme/widgets/pull/103",
+    "merged_at": "2024-06-13T09:30:00Z",
+    "merge_commit_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "draft": false,
+    "base": { "ref": "main" },
+    "head": { "ref": "fix/timeouts" },
+    "updated_at": "2024-06-13T09:30:00Z"
+  }
+]

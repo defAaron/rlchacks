@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureComment119",
+  "prNumber": 119,
+  "path": "src/types.ts",
+  "body": "Avoid any — use unknown and narrow before use.",
+  "author": "jade",
+  "createdAt": "2024-06-16T18:00:00Z",
+  "diffHunk": "@@ -1,3 +1,3 @@\n-export function handle(value: any) {\n+export function handle(value: unknown) {\n   return String(value);\n }",
+  "line": 1,
+  "originalLine": 1,
+  "side": "RIGHT",
+  "commitId": "c119bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "htmlUrl": "https://github.com/acme/widgets/pull/119#discussion_r119"
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1004,
+    "node_id": "PR_kwDOFixtureD",
+    "number": 104,
+    "state": "closed",
+    "title": "Draft that never merged",
+    "html_url": "https://github.com/acme/widgets/pull/104",
+    "merged_at": null,
+    "merge_commit_sha": null,
+    "draft": true,
+    "base": { "ref": "main" },
+    "head": { "ref": "draft/logging" },
+    "updated_at": "2024-06-12T11:00:00Z"
+  },
+  {
+    "id": 1005,
+    "node_id": "PR_kwDOFixtureE",
+    "number": 105,
+    "state": "closed",
+    "title": "Tighten error messages",
+    "html_url": "https://github.com/acme/widgets/pull/105",
+    "merged_at": "2024-06-10T16:45:00Z",
+    "merge_commit_sha": "cccccccccccccccccccccccccccccccccccccccc",
+    "draft": false,
+    "base": { "ref": "main" },
+    "head": { "ref": "chore/errors" },
+    "updated_at": "2024-06-10T16:45:00Z"
+  }
+]

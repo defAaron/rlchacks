@@ -1,0 +1,10 @@
+{
+  "id": "PR_kwDOFixture101",
+  "number": 101,
+  "mergedAt": "2024-06-15T12:00:00Z",
+  "mergeCommitSha": "m101aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "baseRef": "main",
+  "headRef": "feat/pr-101",
+  "title": "Extract retry helper",
+  "url": "https://github.com/acme/widgets/pull/101"
+}

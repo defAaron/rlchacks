@@ -1,0 +1,14 @@
+{
+  "repo": "acme/widgets",
+  "updatedAt": "2024-07-01T00:00:00.000Z",
+  "discards": [
+    {
+      "commentId": "PRRC_kwDOFixtureCommentLgtm",
+      "prNumber": 101,
+      "path": "src/retry.ts",
+      "author": "reviewer2",
+      "discardReason": "lgtm",
+      "bodyPreview": "LGTM"
+    }
+  ]
+}

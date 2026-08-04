@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureComment111",
+  "prNumber": 111,
+  "path": "src/run.ts",
+  "body": "Prefer early return over nested try/catch here.",
+  "author": "bob",
+  "createdAt": "2024-06-16T10:00:00Z",
+  "diffHunk": "@@ -1,4 +1,4 @@\n export async function run(fn) {\n   if (!fn) return;\n-    try { return await fn(); } catch (e) { throw e; }\n+  return await fn();\n }",
+  "line": 3,
+  "originalLine": 3,
+  "side": "RIGHT",
+  "commitId": "c111bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "htmlUrl": "https://github.com/acme/widgets/pull/111#discussion_r111"
+}

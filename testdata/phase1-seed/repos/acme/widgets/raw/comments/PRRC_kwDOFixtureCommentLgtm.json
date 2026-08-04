@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureCommentLgtm",
+  "prNumber": 101,
+  "path": "src/retry.ts",
+  "body": "LGTM",
+  "author": "reviewer2",
+  "createdAt": "2024-06-14T11:00:00Z",
+  "diffHunk": null,
+  "line": 1,
+  "originalLine": 1,
+  "side": "RIGHT",
+  "commitId": "dddddddddddddddddddddddddddddddddddddddd",
+  "htmlUrl": "https://github.com/acme/widgets/pull/101#discussion_r9002"
+}

@@ -1,0 +1,10 @@
+{
+  "id": "PR_kwDOFixture110",
+  "number": 110,
+  "mergedAt": "2024-06-16T10:00:00Z",
+  "mergeCommitSha": "m110aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "baseRef": "main",
+  "headRef": "feat/pr-110",
+  "title": "Fetch client timeouts",
+  "url": "https://github.com/acme/widgets/pull/110"
+}

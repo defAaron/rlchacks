@@ -1,0 +1,163 @@
+[
+  {
+    "id": "actionable-early-return",
+    "description": "Phase-1 seed style guidance — keep",
+    "author": "reviewer1",
+    "body": "Prefer early return over nested try/catch here.",
+    "expected": { "actionable": true, "discardReason": null }
+  },
+  {
+    "id": "actionable-helper-request",
+    "description": "Concrete rewrite request — keep",
+    "author": "alice",
+    "body": "Please use the shared retry helper instead of a bare setTimeout.",
+    "expected": { "actionable": true, "discardReason": null }
+  },
+  {
+    "id": "actionable-lgtm-with-ask",
+    "description": "LGTM plus real ask — keep",
+    "author": "bob",
+    "body": "LGTM, but please extract the timeout into withRetry.",
+    "expected": { "actionable": true, "discardReason": null }
+  },
+  {
+    "id": "actionable-nit-with-guidance",
+    "description": "Substantive nit — keep",
+    "author": "carol",
+    "body": "nit: extract this into a helper so callers can reuse the backoff.",
+    "expected": { "actionable": true, "discardReason": null }
+  },
+  {
+    "id": "actionable-short-with-suggestion",
+    "description": "Short body but has suggestion fence — keep",
+    "author": "dave",
+    "body": "Fix:\n```suggestion\nreturn await fn();\n```",
+    "expected": { "actionable": true, "discardReason": null }
+  },
+  {
+    "id": "noise-lgtm",
+    "description": "Pure LGTM — discard",
+    "author": "alice",
+    "body": "LGTM",
+    "expected": { "actionable": false, "discardReason": "lgtm" }
+  },
+  {
+    "id": "noise-lgtm-shipit",
+    "description": "LGTM with shipit shortcode — discard",
+    "author": "alice",
+    "body": "lgtm :shipit:",
+    "expected": { "actionable": false, "discardReason": "lgtm" }
+  },
+  {
+    "id": "noise-looks-good-to-me",
+    "description": "Looks good to me — discard",
+    "author": "bob",
+    "body": "Looks good to me!",
+    "expected": { "actionable": false, "discardReason": "lgtm" }
+  },
+  {
+    "id": "noise-thanks",
+    "description": "Thanks-only — discard",
+    "author": "carol",
+    "body": "Thanks!",
+    "expected": { "actionable": false, "discardReason": "thanks" }
+  },
+  {
+    "id": "noise-thank-you",
+    "description": "Thank you — discard",
+    "author": "carol",
+    "body": "Thank you",
+    "expected": { "actionable": false, "discardReason": "thanks" }
+  },
+  {
+    "id": "noise-praise-nice",
+    "description": "Pure praise — discard",
+    "author": "dave",
+    "body": "Nice work!",
+    "expected": { "actionable": false, "discardReason": "praise" }
+  },
+  {
+    "id": "noise-praise-great-job",
+    "description": "Pure praise — discard",
+    "author": "dave",
+    "body": "Great job",
+    "expected": { "actionable": false, "discardReason": "praise" }
+  },
+  {
+    "id": "noise-emoji-only-thumbs",
+    "description": "Emoji-only — discard",
+    "author": "erin",
+    "body": "👍",
+    "expected": { "actionable": false, "discardReason": "emoji_only" }
+  },
+  {
+    "id": "noise-emoji-only-cluster",
+    "description": "Emoji cluster — discard",
+    "author": "erin",
+    "body": "🎉🚀✨",
+    "expected": { "actionable": false, "discardReason": "emoji_only" }
+  },
+  {
+    "id": "noise-emoji-shortcode",
+    "description": "Shortcode-only — discard",
+    "author": "erin",
+    "body": ":thumbsup:",
+    "expected": { "actionable": false, "discardReason": "emoji_only" }
+  },
+  {
+    "id": "noise-bot-dependabot",
+    "description": "Dependabot author — discard",
+    "author": "dependabot[bot]",
+    "body": "Please bump lodash to fix a security issue in nested deps.",
+    "expected": { "actionable": false, "discardReason": "bot_author" }
+  },
+  {
+    "id": "noise-bot-suffix",
+    "description": "Author ending in [bot] — discard",
+    "author": "codecov[bot]",
+    "body": "Coverage decreased by 0.2%.",
+    "expected": { "actionable": false, "discardReason": "bot_author" }
+  },
+  {
+    "id": "noise-bot-dash-bot",
+    "description": "Author matching *-bot — discard",
+    "author": "snyk-bot",
+    "body": "Potential XSS in this handler; sanitize user input.",
+    "expected": { "actionable": false, "discardReason": "bot_author" }
+  },
+  {
+    "id": "noise-nit-bare",
+    "description": "Bare nit — discard",
+    "author": "frank",
+    "body": "nit",
+    "expected": { "actionable": false, "discardReason": "non_actionable_nit" }
+  },
+  {
+    "id": "noise-nit-emoji",
+    "description": "Nit + emoji — discard",
+    "author": "frank",
+    "body": "nit 👍",
+    "expected": { "actionable": false, "discardReason": "non_actionable_nit" }
+  },
+  {
+    "id": "noise-nit-spacing",
+    "description": "Nit about spacing only — discard",
+    "author": "frank",
+    "body": "nit: spacing",
+    "expected": { "actionable": false, "discardReason": "non_actionable_nit" }
+  },
+  {
+    "id": "noise-too-short",
+    "description": "Below length threshold, no fence — discard",
+    "author": "gina",
+    "body": "fix this",
+    "expected": { "actionable": false, "discardReason": "too_short" }
+  },
+  {
+    "id": "noise-empty",
+    "description": "Empty body — discard",
+    "author": "gina",
+    "body": "   ",
+    "expected": { "actionable": false, "discardReason": "too_short" }
+  }
+]

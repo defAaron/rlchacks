@@ -1,0 +1,5 @@
+export function parsePayload(input) {
+  if (input == null) return null;
+  const data = JSON.parse(input);
+  return data.value;
+}

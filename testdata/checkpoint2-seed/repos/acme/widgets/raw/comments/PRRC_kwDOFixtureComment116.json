@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureComment116",
+  "prNumber": 116,
+  "path": "src/batch.ts",
+  "body": "Use Promise.all instead of sequential awaits for these independent fetches.",
+  "author": "gina",
+  "createdAt": "2024-06-16T15:00:00Z",
+  "diffHunk": "@@ -1,5 +1,4 @@\n export async function loadAll(ids) {\n-  const a = await fetchOne(ids[0]);\n-  const b = await fetchOne(ids[1]);\n+  const [a, b] = await Promise.all([fetchOne(ids[0]), fetchOne(ids[1])]);\n   return [a, b];\n }",
+  "line": 3,
+  "originalLine": 3,
+  "side": "RIGHT",
+  "commitId": "c116bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "htmlUrl": "https://github.com/acme/widgets/pull/116#discussion_r116"
+}

@@ -1,0 +1,31 @@
+{
+  "id": "ep_512eba408688a615",
+  "repo": "acme/widgets",
+  "prNumber": 113,
+  "commentId": "PRRC_kwDOFixtureComment113",
+  "path": "src/config.ts",
+  "language": "typescript",
+  "commentBody": "Use const for enabled — it is never reassigned.",
+  "rejected": {
+    "path": "src/config.ts",
+    "startLine": 2,
+    "endLine": 2,
+    "sha": "blob113bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "text": "  let enabled = true;",
+    "normalized": "letenabled=true;"
+  },
+  "accepted": {
+    "path": "src/config.ts",
+    "startLine": 2,
+    "endLine": 2,
+    "sha": "blob113aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "text": "  const enabled = true;",
+    "normalized": "constenabled=true;"
+  },
+  "linkConfidence": "high",
+  "linkReason": "rejected_from_line_blob+exact_span_replacement",
+  "actionable": true,
+  "discardReason": null,
+  "reviewer": "dana",
+  "mergedAt": "2024-06-16T13:00:00Z"
+}

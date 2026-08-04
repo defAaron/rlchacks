@@ -1,0 +1,5 @@
+export function submit(email) {
+  // form submit
+  if (!/.+@.+/.test(email)) throw new Error("bad email");
+  return post(email);
+}

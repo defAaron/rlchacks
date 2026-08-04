@@ -1,0 +1,4 @@
+export async function run(fn) {
+  if (!fn) return;
+  return await fn();
+}

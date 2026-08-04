@@ -1,0 +1,31 @@
+{
+  "id": "ep_383aeca07cd72b2c",
+  "repo": "acme/widgets",
+  "prNumber": 117,
+  "commentId": "PRRC_kwDOFixtureComment117",
+  "path": "src/index-map.ts",
+  "language": "typescript",
+  "commentBody": "Prefer a Map for id lookup instead of a plain object.",
+  "rejected": {
+    "path": "src/index-map.ts",
+    "startLine": 3,
+    "endLine": 3,
+    "sha": "blob117bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "text": "  for (const item of items) out[item.id] = item;",
+    "normalized": "for(constitemofitems)out[item.id]=item;"
+  },
+  "accepted": {
+    "path": "src/index-map.ts",
+    "startLine": 2,
+    "endLine": 3,
+    "sha": "blob117aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "text": "  const out = new Map();\n  for (const item of items) out.set(item.id, item);",
+    "normalized": "constout=newMap();\nfor(constitemofitems)out.set(item.id,item);"
+  },
+  "linkConfidence": "medium",
+  "linkReason": "rejected_from_line_blob+overlap_lexical",
+  "actionable": true,
+  "discardReason": null,
+  "reviewer": "hank",
+  "mergedAt": "2024-06-16T17:00:00Z"
+}

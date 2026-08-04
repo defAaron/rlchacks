@@ -1,0 +1,31 @@
+{
+  "id": "ep_3972ce992bb85cc7",
+  "repo": "acme/widgets",
+  "prNumber": 119,
+  "commentId": "PRRC_kwDOFixtureComment119",
+  "path": "src/types.ts",
+  "language": "typescript",
+  "commentBody": "Avoid any — use unknown and narrow before use.",
+  "rejected": {
+    "path": "src/types.ts",
+    "startLine": 1,
+    "endLine": 1,
+    "sha": "blob119bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "text": "export function handle(value: any) {",
+    "normalized": "exportfunctionhandle(value:any){"
+  },
+  "accepted": {
+    "path": "src/types.ts",
+    "startLine": 1,
+    "endLine": 1,
+    "sha": "blob119aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "text": "export function handle(value: unknown) {",
+    "normalized": "exportfunctionhandle(value:unknown){"
+  },
+  "linkConfidence": "high",
+  "linkReason": "rejected_from_line_blob+exact_span_replacement",
+  "actionable": true,
+  "discardReason": null,
+  "reviewer": "jade",
+  "mergedAt": "2024-06-16T19:00:00Z"
+}

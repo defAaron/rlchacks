@@ -1,0 +1,4 @@
+export async function fetchThing() {
+  await withRetry(() => fetchThing());
+  return true;
+}

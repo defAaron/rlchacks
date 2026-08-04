@@ -1,0 +1,13 @@
+{
+  "type": "file",
+  "encoding": "base64",
+  "size": 296,
+  "name": "retry.ts",
+  "path": "src/retry.ts",
+  "content": "ZXhwb3J0IGFzeW5jIGZ1bmN0aW9uIHJldHJ5PFQ+KGZuOiAoKSA9PiBQcm9t\naXNlPFQ+LCBhdHRlbXB0cyA9IDMpOiBQcm9taXNlPFQ+IHsKICBsZXQgbGFz\ndEVycm9yOiB1bmtub3duOwogIGZvciAobGV0IGkgPSAwOyBpIDwgYXR0ZW1w\ndHM7IGkrKykgewogICAgdHJ5IHsKICAgICAgcmV0dXJuIGF3YWl0IGZuKCk7\nCiAgICB9IGNhdGNoIChlcnIpIHsKICAgICAgaWYgKGkgPT09IGF0dGVtcHRz\nIC0gMSkgdGhyb3cgZXJyOwogICAgICBsYXN0RXJyb3IgPSBlcnI7CiAgICB9\nCiAgfQogIHRocm93IGxhc3RFcnJvcjsKfQo=\n",
+  "sha": "blobsha1111111111111111111111111111111111",
+  "url": "https://api.github.com/repos/acme/widgets/contents/src/retry.ts?ref=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "git_url": "https://api.github.com/repos/acme/widgets/git/blobs/blobsha1111111111111111111111111111111111",
+  "html_url": "https://github.com/acme/widgets/blob/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/src/retry.ts",
+  "download_url": "https://raw.githubusercontent.com/acme/widgets/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/src/retry.ts"
+}

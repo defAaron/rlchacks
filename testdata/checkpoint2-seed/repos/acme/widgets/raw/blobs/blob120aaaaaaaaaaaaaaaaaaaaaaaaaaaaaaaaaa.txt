@@ -1,0 +1,5 @@
+export function submit(email) {
+  // form submit
+  validateEmail(email);
+  return post(email);
+}

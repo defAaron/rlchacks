@@ -1,0 +1,10 @@
+{
+  "id": "PR_kwDOFixture113",
+  "number": 113,
+  "mergedAt": "2024-06-16T13:00:00Z",
+  "mergeCommitSha": "m113aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "baseRef": "main",
+  "headRef": "feat/pr-113",
+  "title": "Const config flag",
+  "url": "https://github.com/acme/widgets/pull/113"
+}

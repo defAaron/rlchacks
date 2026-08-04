@@ -1,0 +1,6 @@
+export function get(key) {
+  // setup
+  prepare();
+  const value = expensiveLookup(key);
+  return value;
+}

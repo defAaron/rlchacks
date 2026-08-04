@@ -1,0 +1,4 @@
+export async function fetchThing() {
+  setTimeout(() => {}, 1000);
+  return true;
+}

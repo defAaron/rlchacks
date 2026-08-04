@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureComment112",
+  "prNumber": 112,
+  "path": "src/cache.ts",
+  "body": "Please memoize this lookup with the shared cache helper.",
+  "author": "carol",
+  "createdAt": "2024-06-16T11:00:00Z",
+  "diffHunk": "@@ -1,6 +1,6 @@\n export function get(key) {\n   // setup\n   prepare();\n-  const value = expensiveLookup(key);\n-  return value;\n+  const value = sharedCache.memoize(key, () => expensiveLookup(key));\n+  return sharedCache.get(key) ?? value;\n }",
+  "line": 4,
+  "originalLine": 4,
+  "side": "RIGHT",
+  "commitId": "c112bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "htmlUrl": "https://github.com/acme/widgets/pull/112#discussion_r112"
+}

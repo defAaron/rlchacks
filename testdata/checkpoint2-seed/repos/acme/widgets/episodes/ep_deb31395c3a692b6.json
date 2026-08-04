@@ -1,0 +1,31 @@
+{
+  "id": "ep_deb31395c3a692b6",
+  "repo": "acme/widgets",
+  "prNumber": 118,
+  "commentId": "PRRC_kwDOFixtureComment118",
+  "path": "src/status.ts",
+  "language": "typescript",
+  "commentBody": "Throw in the default branch instead of silently returning undefined.",
+  "rejected": {
+    "path": "src/status.ts",
+    "startLine": 6,
+    "endLine": 6,
+    "sha": "blob118bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "text": "      return undefined;",
+    "normalized": "returnundefined;"
+  },
+  "accepted": {
+    "path": "src/status.ts",
+    "startLine": 6,
+    "endLine": 6,
+    "sha": "blob118aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "text": "      throw new Error(`unknown status: ${status}`);",
+    "normalized": "thrownewError(S);"
+  },
+  "linkConfidence": "high",
+  "linkReason": "rejected_from_line_blob+exact_span_replacement",
+  "actionable": true,
+  "discardReason": null,
+  "reviewer": "iris",
+  "mergedAt": "2024-06-16T18:00:00Z"
+}

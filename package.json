@@ -1,0 +1,24 @@
+{
+  "name": "graft",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Graft — graft past code-review rewrites into the current change",
+  "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "npm run build -w @graft/shared && npm run build -w @graft/ingestion -w @graft/pipeline -w @graft/linking && npm run build --workspaces --if-present",
+    "typecheck": "npm run build -w @graft/shared && npm run build -w @graft/ingestion -w @graft/pipeline -w @graft/linking && npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "graft": "node packages/cli/dist/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.0",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.5"
+  }
+}

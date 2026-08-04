@@ -1,0 +1,10 @@
+{
+  "id": "PR_kwDOFixture112",
+  "number": 112,
+  "mergedAt": "2024-06-16T12:00:00Z",
+  "mergeCommitSha": "m112aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "baseRef": "main",
+  "headRef": "feat/pr-112",
+  "title": "Cache lookups",
+  "url": "https://github.com/acme/widgets/pull/112"
+}

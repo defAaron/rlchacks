@@ -1,0 +1,10 @@
+{
+  "id": "PR_kwDOFixture111",
+  "number": 111,
+  "mergedAt": "2024-06-16T11:00:00Z",
+  "mergeCommitSha": "m111aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "baseRef": "main",
+  "headRef": "feat/pr-111",
+  "title": "Simplify run wrapper",
+  "url": "https://github.com/acme/widgets/pull/111"
+}

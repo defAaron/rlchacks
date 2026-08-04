@@ -1,0 +1,31 @@
+{
+  "id": "ep_0145e50dae62af02",
+  "repo": "acme/widgets",
+  "prNumber": 112,
+  "commentId": "PRRC_kwDOFixtureComment112",
+  "path": "src/cache.ts",
+  "language": "typescript",
+  "commentBody": "Please memoize this lookup with the shared cache helper.",
+  "rejected": {
+    "path": "src/cache.ts",
+    "startLine": 4,
+    "endLine": 4,
+    "sha": "blob112bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "text": "  const value = expensiveLookup(key);",
+    "normalized": "constvalue=expensiveLookup(key);"
+  },
+  "accepted": {
+    "path": "src/cache.ts",
+    "startLine": 4,
+    "endLine": 5,
+    "sha": "blob112aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "text": "  const value = sharedCache.memoize(key, () => expensiveLookup(key));\n  return sharedCache.get(key) ?? value;",
+    "normalized": "constvalue=sharedCache.memoize(key,()=>expensiveLookup(key));\nreturnsharedCache.get(key)??value;"
+  },
+  "linkConfidence": "medium",
+  "linkReason": "rejected_from_line_blob+overlap_lexical",
+  "actionable": true,
+  "discardReason": null,
+  "reviewer": "carol",
+  "mergedAt": "2024-06-16T12:00:00Z"
+}

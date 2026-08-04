@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureComment118",
+  "prNumber": 118,
+  "path": "src/status.ts",
+  "body": "Throw in the default branch instead of silently returning undefined.",
+  "author": "iris",
+  "createdAt": "2024-06-16T17:00:00Z",
+  "diffHunk": "@@ -3,7 +3,7 @@ export function label(status) {\n     case \"ok\":\n       return \"OK\";\n     default:\n-      return undefined;\n+      throw new Error(`unknown status: ${status}`);\n   }\n }",
+  "line": 6,
+  "originalLine": 6,
+  "side": "RIGHT",
+  "commitId": "c118bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "htmlUrl": "https://github.com/acme/widgets/pull/118#discussion_r118"
+}

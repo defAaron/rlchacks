@@ -1,0 +1,14 @@
+{
+  "id": "PRRC_kwDOFixtureComment114",
+  "prNumber": 114,
+  "path": "src/user.ts",
+  "body": "Prefer optional chaining for user.name access.",
+  "author": "erin",
+  "createdAt": "2024-06-16T13:00:00Z",
+  "diffHunk": "@@ -1,3 +1,3 @@\n export function displayName(user) {\n-  return user && user.name ? user.name : \"anonymous\";\n+  return user?.name ?? \"anonymous\";\n }",
+  "line": 2,
+  "originalLine": 2,
+  "side": "RIGHT",
+  "commitId": "c114bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "htmlUrl": "https://github.com/acme/widgets/pull/114#discussion_r114"
+}

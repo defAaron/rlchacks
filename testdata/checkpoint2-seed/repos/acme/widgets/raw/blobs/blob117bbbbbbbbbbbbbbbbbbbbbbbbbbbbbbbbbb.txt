@@ -1,0 +1,5 @@
+export function indexById(items) {
+  const out = {};
+  for (const item of items) out[item.id] = item;
+  return out;
+}

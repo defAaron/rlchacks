@@ -1,0 +1,140 @@
+[
+  {
+    "id": "high-suggestion-block-applied",
+    "description": "TRD: Suggestion block applied → high",
+    "path": "src/api/client.ts",
+    "commentBody": "Please use withRetry instead of setTimeout.\n```suggestion\n  await withRetry(() => fetchThing());\n```",
+    "rejected": {
+      "path": "src/api/client.ts",
+      "startLine": 2,
+      "endLine": 2,
+      "sha": "beforeaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "text": "  setTimeout(() => {}, 1000);",
+      "normalized": "setTimeout(()=>{},N);"
+    },
+    "beforeText": "export async function fetchThing() {\n  setTimeout(() => {}, 1000);\n  return true;\n}\n",
+    "afterText": "export async function fetchThing() {\n  await withRetry(() => fetchThing());\n  return true;\n}\n",
+    "afterSha": "afteraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "expected": {
+      "linkConfidence": "high",
+      "linkReason": "suggestion_block_applied",
+      "accepted": {
+        "path": "src/api/client.ts",
+        "startLine": 2,
+        "endLine": 2,
+        "sha": "afteraaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "text": "  await withRetry(() => fetchThing());",
+        "normalized": "awaitwithRetry(()=>fetchThing());"
+      }
+    }
+  },
+  {
+    "id": "high-exact-span-replacement",
+    "description": "TRD: Exact span replacement → high",
+    "path": "src/retry.ts",
+    "commentBody": "Prefer early return over nested try/catch here.",
+    "rejected": {
+      "path": "src/retry.ts",
+      "startLine": 3,
+      "endLine": 3,
+      "sha": "beforebbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "text": "    try { return await fn(); } catch (e) { throw e; }",
+      "normalized": "try{returnawaitfn();}catch(e){throwe;}"
+    },
+    "beforeText": "export async function run(fn) {\n  if (!fn) return;\n    try { return await fn(); } catch (e) { throw e; }\n}\n",
+    "afterText": "export async function run(fn) {\n  if (!fn) return;\n  return await fn();\n}\n",
+    "afterSha": "afterbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "expected": {
+      "linkConfidence": "high",
+      "linkReason": "exact_span_replacement",
+      "accepted": {
+        "path": "src/retry.ts",
+        "startLine": 3,
+        "endLine": 3,
+        "sha": "afterbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "text": "  return await fn();",
+        "normalized": "returnawaitfn();"
+      }
+    }
+  },
+  {
+    "id": "medium-overlap-lexical",
+    "description": "TRD: Overlapping line change + lexical overlap with comment keywords → medium (multi-line hunk overlaps rejected; not exact span replace)",
+    "path": "src/cache.ts",
+    "commentBody": "Please memoize this lookup with the shared cache helper.",
+    "rejected": {
+      "path": "src/cache.ts",
+      "startLine": 4,
+      "endLine": 4,
+      "sha": "beforecccccccccccccccccccccccccccccccccc",
+      "text": "  const value = expensiveLookup(key);",
+      "normalized": "constvalue=expensiveLookup(key);"
+    },
+    "beforeText": "export function get(key) {\n  // setup\n  prepare();\n  const value = expensiveLookup(key);\n  return value;\n}\n",
+    "afterText": "export function get(key) {\n  // setup\n  prepare();\n  const value = sharedCache.memoize(key, () => expensiveLookup(key));\n  return sharedCache.get(key) ?? value;\n}\n",
+    "afterSha": "afterccccccccccccccccccccccccccccccccccc",
+    "expected": {
+      "linkConfidence": "medium",
+      "linkReason": "overlap_lexical",
+      "accepted": {
+        "path": "src/cache.ts",
+        "startLine": 4,
+        "endLine": 5,
+        "sha": "afterccccccccccccccccccccccccccccccccccc",
+        "text": "  const value = sharedCache.memoize(key, () => expensiveLookup(key));\n  return sharedCache.get(key) ?? value;",
+        "normalized": "constvalue=sharedCache.memoize(key,()=>expensiveLookup(key));\nreturnsharedCache.get(key)??value;"
+      }
+    }
+  },
+  {
+    "id": "low-same-file-only",
+    "description": "TRD / LNK-2: Same-file change only (no line overlap) → low",
+    "path": "src/util.ts",
+    "commentBody": "Please extract a helper for the validation near the top.",
+    "rejected": {
+      "path": "src/util.ts",
+      "startLine": 2,
+      "endLine": 2,
+      "sha": "beforedddddddddddddddddddddddddddddddddd",
+      "text": "  validate(input);",
+      "normalized": "validate(input);"
+    },
+    "beforeText": "export function process(input) {\n  validate(input);\n  const a = 1;\n  const b = 2;\n  const c = 3;\n  const d = 4;\n  const e = 5;\n  const f = 6;\n  const g = 7;\n  const h = 8;\n  return a + b + c + d + e + f + g + h;\n}\n",
+    "afterText": "export function process(input) {\n  validate(input);\n  const a = 1;\n  const b = 2;\n  const c = 3;\n  const d = 4;\n  const e = 5;\n  const f = 6;\n  const g = 7;\n  const h = 8;\n  return sumAll(a, b, c, d, e, f, g, h);\n}\n",
+    "afterSha": "afterddddddddddddddddddddddddddddddddddd",
+    "expected": {
+      "linkConfidence": "low",
+      "linkReason": "same_file_only",
+      "accepted": {
+        "path": "src/util.ts",
+        "startLine": 11,
+        "endLine": 11,
+        "sha": "afterddddddddddddddddddddddddddddddddddd",
+        "text": "  return sumAll(a, b, c, d, e, f, g, h);",
+        "normalized": "returnsumAll(a,b,c,d,e,f,g,h);"
+      }
+    }
+  },
+  {
+    "id": "none-no-change",
+    "description": "TRD / LNK-3: No change on path → none",
+    "path": "src/stable.ts",
+    "commentBody": "Consider renaming this variable for clarity.",
+    "rejected": {
+      "path": "src/stable.ts",
+      "startLine": 2,
+      "endLine": 2,
+      "sha": "beforeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "text": "  const x = 1;",
+      "normalized": "constx=N;"
+    },
+    "beforeText": "export function stable() {\n  const x = 1;\n  return x;\n}\n",
+    "afterText": "export function stable() {\n  const x = 1;\n  return x;\n}\n",
+    "afterSha": "aftereeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "expected": {
+      "linkConfidence": "none",
+      "linkReason": "no_change",
+      "accepted": null
+    }
+  }
+]
